@@ -1,0 +1,57 @@
+# Project-specific configuration. Copy to <repo>/.dpdp/config.yaml.
+# Everything here is a project decision. The skill never assumes these values.
+project:
+  id: campus-clinic
+  name: Campus Clinic Appointments
+  purpose: Students book appointments with the campus health centre.
+  owner_team: Health Centre IT
+
+stack:
+  languages: [python]
+  frameworks: [flask]
+  datastores: [postgres]
+  infra: [docker, on-prem]
+  test_command: "python -m pytest -q"
+
+deployment:
+  environments: [dev, staging, prod]
+  data_location: India (on-prem)
+
+organisation:
+  role: fiduciary            # fiduciary | processor | both | unknown  (decided by humans, recorded with evidence)
+  role_evidence: "Health centre decides purposes and means (charter doc ref)."
+  may_be_state_instrumentality: unknown   # yes | no | unknown -> legal question if unknown
+  significant_data_fiduciary_notified: no # yes (with notification ref) | no | unknown
+
+contacts:                    # roles used for escalation; contact details stay in the org's systems
+  legal_reviewer: "Institute legal cell"
+  security_owner: "IT security officer"
+  data_owner: "Chief Medical Officer"
+  release_manager: "Health Centre IT lead"
+  public_privacy_contact_url: "https://example.invalid/privacy-contact"   # r.9 contact page
+
+policy_choices:              # approved decisions; leave null until approved
+  grievance_response_days: 30      # must be <= 90
+  log_retention_days: 365          # >= 365 per Rules r.8(3)
+  supported_notice_languages: [en, hi, bn]
+  minors_possible: unknown         # yes | no | unknown
+  retention:
+    appointments: "7 years after last visit (medical records rule) - pending legal confirmation"
+    marketing_preferences: "until withdrawn"
+
+vendors:
+  - id: V-01
+    name: Analytics vendor
+    role: processor
+    region: outside India
+    purpose: usage analytics
+    contract_ref: null             # fill from procurement; unknown -> legal question
+    erasure_method: "vendor delete API"
+
+processing_activities:       # the processing register (pattern 1)
+  - id: PA-01
+    purpose: Book and manage clinic appointments
+    lawful_ground: "s.7(a)"        # pending legal confirmation
+  - id: PA-02
+    purpose: Health newsletter emails
+    lawful_ground: consent

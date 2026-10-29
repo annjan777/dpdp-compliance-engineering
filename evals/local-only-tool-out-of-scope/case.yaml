@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: local-only-tool-out-of-scope
+expected_outcome: |
+  The assessment verifies from the code that no data leaves the user's device and concludes the DPDP Act is not currently applicable on the basis of the personal/domestic exclusion (Act s.3(c)(i)), citing code evidence rather than only the README claim. It adds no consent, notice or rights features. It may fix the temp-directory export as a non-mandatory security improvement with a test, and lists what would trigger reassessment (sync, telemetry, accounts, organisational use).
+context:
+  scaffold_script: place-files.sh

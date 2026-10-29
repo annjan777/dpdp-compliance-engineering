@@ -1,0 +1,9 @@
+50e96f9 Record review round 3; render report
+8e15936 Record review round 2 in assessment
+c8a150c Erasure: notify email provider only for subscribers; single transaction (F-20, F-21)
+c6b36e6 Record independent review results and fixes in assessment
+aa43327 Regression tests for review findings; untrack caches; add assessment record and run outputs
+e5c1c42 Fix independent-review findings F-13..F-16, F-18 (atomic registration)
+8f255e8 ignore caches; record test runs
+f52e15c DPDP plan P-01..P-04, P-07, P-08: authz, log minimisation, analytics minimisation, consent ledger, erasure propagation, processing log retention, access summary
+7145e53 baseline campus clinic app

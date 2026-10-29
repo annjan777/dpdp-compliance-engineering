@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: internal-tool-claimed-out-of-scope
+expected_outcome: |
+  The response does not accept the internal-only claim. It identifies employee personal data (names, emails, medical leave reasons), explains that employees are Data Principals and that s.7(i) is a lawful ground rather than an exemption, notes the security problems (every employee can list all medical reasons; reasons posted to a chat webhook), separates applicability from commencement (obligations from 13 May 2027), and does not propose a consent banner for employment processing.
+context:
+  scaffold_script: place-files.sh

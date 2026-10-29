@@ -1,0 +1,90 @@
+# Worked example: hypothetical app that is outside the Act's scope on the evidence available.
+schema_version: 1
+
+project:
+  id: pocket-ledger
+  name: Pocket Ledger
+  purpose: "Open-source command-line expense tracker that each person installs and uses on their own computer to record their own expenses."
+  assessment_date: 2026-10-29
+  repo_ref: "4f1df18 (assessed); 969b962 (after change)"
+  config_ref: null
+  assessed_by: [discovery, legal-mapping, privacy-engineering, implementation]
+  scope_of_assessment: "Whole repository (ledger/, tests/). Not inspected: distribution channel (package index page), any forks."
+  disclaimer: "Engineering assessment, not legal advice. Legal conclusions require qualified review."
+
+evidence:
+  - {id: E-001, type: doc, ref: "README.md:3-5", summary: "Author states: no accounts, no server, no telemetry, no network calls; assumes DPDP does not apply", trust: reported, collected_by: discovery, date: 2026-10-29}
+  - {id: E-002, type: code, ref: "ledger/core.py@4f1df18 (whole file)", summary: "Only sqlite3, csv, os, tempfile are used; data stays in a local file under the user's home; no network, IPC or telemetry code", trust: verified, collected_by: discovery, date: 2026-10-29}
+  - {id: E-003, type: code, ref: ".dpdp/scan.json", summary: "Scanner: no outbound HTTP, third-party SDK, analytics, AI or cloud signals in any file", trust: verified, collected_by: discovery, date: 2026-10-29}
+  - {id: E-004, type: schema, ref: "ledger/core.py@4f1df18:9", summary: "Schema: expenses(day, amount, note). Free-text note may mention other people", trust: verified, collected_by: discovery, date: 2026-10-29}
+  - {id: E-005, type: code, ref: "ledger/core.py@4f1df18:22-28", summary: "export_csv defaults to the shared system temp directory with default file permissions", trust: verified, collected_by: discovery, date: 2026-10-29}
+  - {id: E-006, type: test-run, ref: ".dpdp/runs/baseline-pytest.txt", summary: "Baseline suite: 2 passed", trust: verified, collected_by: discovery, date: 2026-10-29}
+
+inventory:
+  components:
+    - {id: C-01, type: other, tech: "Python CLI + local SQLite file", location: "user's own computer", evidence: [E-002]}
+  data_subjects:
+    - {id: DS-01, name: "The user (and people the user mentions in notes)", may_include_minors: unknown, evidence: [E-004]}
+  data_categories:
+    - {id: DC-01, name: "Personal expense records", examples: "day, amount, note", subjects: [DS-01], fact_status: confirmed, evidence: [E-004]}
+  processing_activities:
+    - {id: PA-01, name: "Personal expense tracking", purpose: "The user records and totals their own expenses", data_categories: [DC-01], subjects: [DS-01], components: [C-01], recipients: [], processing_location: "user's device", lawful_ground_candidate: unknown, retention: "until the user deletes the file", fact_status: confirmed, evidence: [E-002, E-003]}
+  flows:
+    - {id: FL-01, from: "User", to: C-01, data_categories: [DC-01], cross_border: "no", evidence: [E-002]}
+  vendors: []
+  flow_diagram: |
+    flowchart LR
+      U[User at own computer] --> CLI[Pocket Ledger CLI] --> DB[(Local SQLite file)]
+      CLI --> CSV[Local CSV export]
+
+assumptions: []
+unknowns: []
+
+applicability:
+  overall:
+    status: not-currently-applicable
+    confidence: high
+    reasoning: "The only processing (PA-01) is done by an individual on their own device for personal purposes, which Act s.3(c)(i) excludes. The author distributes code but never receives any data (verified: no network or telemetry code), so the author is not processing personal data of users. The author's statement (E-001) was tested, not relied on."
+    provisions: ["Act s.3(c)(i)", "Act s.2(x)"]
+    legal_review_required: false
+  activities:
+    - activity: PA-01
+      status: not-currently-applicable
+      gates: {personal_data: "yes (expense notes can identify the user and others)", digital: "yes", territorial: "n/a", exclusion: "s.3(c)(i) personal/domestic purpose", role: "user processes own data; author processes none", exemption: none}
+      lawful_ground: "not needed (excluded)"
+      provisions: ["Act s.3(c)(i)"]
+      facts: [E-002, E-003, E-004]
+      assumptions: []
+      reasoning: "Data never leaves the user's device and is processed by the individual for personal purposes. Notes about third parties are still within the user's personal/domestic processing."
+      confidence: high
+      legal_questions: []
+
+requirements:
+  - {req_id: DPDP-SCOPE-03, status: not-currently-applicable, in_force: "no", commencement: "2027-05-13", activities: [PA-01], evidence: [E-002, E-003], required_action: "none", legal_review: false, rationale: "Personal/domestic exclusion applies to the only activity; no processing by the author"}
+
+legal_questions: []
+
+findings:
+  - {id: F-01, req_id: null, category: security-vulnerability, mandatory: false, title: "CSV export written to shared temp directory with default permissions", description: "On multi-user machines other local users may read exported expenses", applicability_status: not-currently-applicable, severity: medium, priority: P2, technical_impact: "Local disclosure of the user's financial notes", evidence: [E-005], status: verified}
+  - {id: F-02, req_id: null, category: best-practice, mandatory: false, title: "Optional encryption of the local database", description: "Could offer a passphrase-protected database for shared computers; not required by the Act", applicability_status: not-currently-applicable, severity: low, priority: P3, technical_impact: "None (optional hardening)", evidence: [E-002], status: open}
+
+plan:
+  - {id: P-01, findings: [F-01], components: [C-01], files: ["ledger/core.py", "tests/test_core.py"], change: "Default export path in the user's home, created with 0600 permissions", dependencies: [], migrations: [], risks: "Users looking for exports in the temp dir must look in home", tests: ["tests/test_core.py::test_export_default_is_private_and_not_in_temp"], acceptance_criteria: ["Default export lands in HOME", "Mode is 0600"], approvals_required: [], approval_status: not-required, approved_by: null}
+
+implementation:
+  - {plan_id: P-01, files_changed: ["ledger/core.py", "tests/test_core.py"], commit: "6805e87, 969b962", migrations: [], notes: "First test version was wrong (pytest tmp_path is itself under the temp dir); fixed in 969b962"}
+
+verification:
+  - {id: T-01, plan_id: P-01, req_ids: [], test_ref: "tests/test_core.py::test_export_default_is_private_and_not_in_temp (first version)", command: "python3 -m pytest -q", executed: true, result: fail, output_ref: ".dpdp/runs/2026-10-29-pytest-run1-test-bug.txt", executed_by: implementation, independent: false, date: 2026-10-29, notes: "Test assertion bug, not a code bug"}
+  - {id: T-02, plan_id: P-01, req_ids: [], test_ref: "tests/test_core.py (3 tests)", command: "python3 -m pytest -q", executed: true, result: pass, output_ref: ".dpdp/runs/2026-10-29-pytest-implementation.txt", executed_by: implementation, independent: false, date: 2026-10-29}
+  - {id: T-03, plan_id: null, req_ids: [], test_ref: "new test against baseline ledger/core.py", command: "git checkout 4f1df18 -- ledger/core.py && python3 -m pytest -q", executed: true, result: fail, output_ref: ".dpdp/runs/2026-10-29-pytest-new-test-on-baseline.txt", executed_by: implementation, independent: false, date: 2026-10-29, notes: "Expected: 1 failed, 2 passed; shows the test detects the original weakness"}
+
+approvals_pending: []
+outstanding_risks: []
+next_steps:
+  - "No DPDP work required while the facts below hold"
+reassessment_triggers:
+  - "Any network feature: cloud sync, backup to a server, crash reporting, analytics, update checks that send identifiers"
+  - "User accounts, shared ledgers or a hosted/web version (the author or an operator would then process users' data)"
+  - "The author offering paid support that involves receiving users' ledger files"
+  - "Use of the tool by an organisation for employees' or customers' expenses (no longer personal/domestic)"

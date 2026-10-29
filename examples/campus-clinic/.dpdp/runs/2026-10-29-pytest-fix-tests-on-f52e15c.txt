@@ -1,0 +1,91 @@
+..........FFFFF.FFF                                                      [100%]
+=================================== FAILURES ===================================
+__________ test_erasure_removes_account_and_notifies_email_processor ___________
+
+    def test_erasure_removes_account_and_notifies_email_processor():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       app.delete_user(db, a, a)
+E       TypeError: delete_user() takes 2 positional arguments but 3 were given
+
+tests/test_privacy_controls.py:99: TypeError
+______________________ test_only_account_holder_can_erase ______________________
+
+    def test_only_account_holder_can_erase():
+        db, a, b, c = _db_with_two_patients_and_clinician()
+        for other in (b, c):
+            with pytest.raises(PermissionError):
+>               app.delete_user(db, other, a)
+E               TypeError: delete_user() takes 2 positional arguments but 3 were given
+
+tests/test_privacy_controls.py:109: TypeError
+___________ test_erased_ids_are_not_reused_and_nothing_carries_over ____________
+
+    def test_erased_ids_are_not_reused_and_nothing_carries_over():
+        # F-13 regression (independent review): new user must not inherit an erased user's records or consent
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.grant_consent(db, a, "PA-02", NV)
+>       app.delete_user(db, a, a)
+E       TypeError: delete_user() takes 2 positional arguments but 3 were given
+
+tests/test_privacy_controls.py:116: TypeError
+___________ test_failed_consent_does_not_leave_half_registered_user ____________
+
+    def test_failed_consent_does_not_leave_half_registered_user():
+        db = app.init_db()
+        with pytest.raises(ValueError):
+            app.register(db, "X", "x@example.test", None, None, None, marketing_opt_in=True, notice_version="stale")
+        db.commit()
+>       assert db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0
+E       assert 1 == 0
+
+tests/test_privacy_controls.py:132: AssertionError
+________ test_erasure_keeps_recent_processing_log_and_purge_removes_old ________
+
+    def test_erasure_keeps_recent_processing_log_and_purge_removes_old():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       app.delete_user(db, a, a)
+E       TypeError: delete_user() takes 2 positional arguments but 3 were given
+
+tests/test_privacy_controls.py:137: TypeError
+______________ test_access_summary_lists_purposes_and_recipients _______________
+
+    def test_access_summary_lists_purposes_and_recipients():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        s = app.access_summary(db, a, a)
+        assert {p["id"] for p in s["purposes"]} == {"PA-01"}
+        assert s["appointments_held"] == 1
+>       assert [r["key"] for r in s["recipients"]] == ["analytics"]  # no newsletter consent -> email provider not listed
+                ^^^^^^^^
+E       KeyError: 'key'
+
+tests/test_privacy_controls.py:158: KeyError
+___________ test_access_summary_lists_email_provider_once_consented ____________
+
+    def test_access_summary_lists_email_provider_once_consented():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.grant_consent(db, a, "PA-02", NV)
+>       assert {r["key"] for r in app.access_summary(db, a, a)["recipients"]} == {"analytics", "email"}
+                ^^^^^^^^
+E       KeyError: 'key'
+
+tests/test_privacy_controls.py:164: KeyError
+___________ test_access_summary_denied_for_other_user_and_clinician ____________
+
+    def test_access_summary_denied_for_other_user_and_clinician():
+        db, a, b, c = _db_with_two_patients_and_clinician()
+        for other in (b, c):
+>           with pytest.raises(PermissionError):
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           Failed: DID NOT RAISE PermissionError
+
+tests/test_privacy_controls.py:170: Failed
+=========================== short test summary info ============================
+FAILED tests/test_privacy_controls.py::test_erasure_removes_account_and_notifies_email_processor
+FAILED tests/test_privacy_controls.py::test_only_account_holder_can_erase - T...
+FAILED tests/test_privacy_controls.py::test_erased_ids_are_not_reused_and_nothing_carries_over
+FAILED tests/test_privacy_controls.py::test_failed_consent_does_not_leave_half_registered_user
+FAILED tests/test_privacy_controls.py::test_erasure_keeps_recent_processing_log_and_purge_removes_old
+FAILED tests/test_privacy_controls.py::test_access_summary_lists_purposes_and_recipients
+FAILED tests/test_privacy_controls.py::test_access_summary_lists_email_provider_once_consented
+FAILED tests/test_privacy_controls.py::test_access_summary_denied_for_other_user_and_clinician
+8 failed, 11 passed in 0.15s

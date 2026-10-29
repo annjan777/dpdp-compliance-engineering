@@ -1,0 +1,505 @@
+# DPDP requirement catalog. Machine-readable, used by validate_assessment.py and render_report.py.
+# Each entry is a candidate requirement. It becomes an obligation for a project only after the
+# triggers hold and no exception applies (see applicability-method.md). Paraphrased, not legal text.
+# commencement: date the cited provisions take effect (see legal-sources.md).
+catalog_version: "2026-10-29"
+requirements:
+
+  # ---------- Scope gates (assessed first; not obligations themselves) ----------
+  - id: DPDP-SCOPE-01
+    title: Personal data is processed in digital form
+    area: scope
+    cites: ["Act s.2(t)", "Act s.2(n)", "Act s.2(x)", "Act s.3(a)"]
+    commencement: "2027-05-13"
+    gate: true
+    question: Does any activity process data about an identifiable individual in digital form (or digitise it)?
+    legal_review_when: ["only pseudonymous, hashed or aggregated identifiers are processed"]
+
+  - id: DPDP-SCOPE-02
+    title: Territorial nexus
+    area: scope
+    cites: ["Act s.3(a)", "Act s.3(b)"]
+    commencement: "2027-05-13"
+    gate: true
+    question: Is processing in India, or outside India but connected with offering goods or services to Data Principals in India?
+    legal_review_when: ["processing happens outside India and Indian users are incidental"]
+
+  - id: DPDP-SCOPE-03
+    title: Statutory exclusions
+    area: scope
+    cites: ["Act s.3(c)(i)", "Act s.3(c)(ii)"]
+    commencement: "2027-05-13"
+    gate: true
+    question: Is the processing by an individual for personal or domestic purposes, or of data the Data Principal herself (or a legally obliged person) made public?
+    legal_review_when: ["data was scraped or collected from public sources", "a tool is used both personally and for an organisation"]
+
+  - id: DPDP-SCOPE-04
+    title: Organisational role
+    area: scope
+    cites: ["Act s.2(i)", "Act s.2(k)", "Act s.8(1)", "Act s.8(2)"]
+    commencement: "2027-05-13"
+    gate: true
+    question: For each activity, who determines purpose and means (fiduciary), and who processes on their behalf (processor)?
+    legal_review_when: ["a vendor also uses the data for its own purposes", "two organisations jointly decide purposes"]
+
+  - id: DPDP-SCOPE-05
+    title: Exemptions
+    area: scope
+    cites: ["Act s.17(1)", "Act s.17(2)(a)", "Act s.17(2)(b)", "Rules r.16", "Rules Sch.2", "Act s.17(3)", "Act s.17(4)", "Act s.17(5)"]
+    commencement: "2027-05-13"
+    gate: true
+    question: Does an exemption apply with every condition evidenced? Notified exemptions need the notification itself.
+    notes: "s.17(1) is partial: s.8(1) and s.8(5) still apply. s.17(2)(b) needs no Data-Principal-specific decision AND Sch.2 standards. s.17(4) applies only to the State or its instrumentalities."
+    legal_review_when: ["any exemption is relied on", "organisation may be State under Article 12"]
+
+  # ---------- Lawful processing ----------
+  - id: DPDP-LAW-01
+    title: Every purpose has a lawful ground (consent or a specific legitimate use)
+    area: lawful-processing
+    cites: ["Act s.4"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed for a purpose"]
+    obligation: Record, per processing purpose, whether it relies on consent or a named s.7 clause, and that the purpose is lawful.
+    evidence_expected: ["processing register with ground per purpose", "code paths gated by that ground"]
+    controls: ["processing-activity register in config or code", "purpose tags on data flows"]
+    tests: ["each purpose in code maps to a registered ground"]
+    penalty_item: 7
+
+  - id: DPDP-LAW-02
+    title: Legitimate-use conditions are actually met
+    area: lawful-processing
+    cites: ["Act s.7", "Rules r.5", "Rules Sch.2"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["a purpose relies on a s.7 legitimate use"]
+    obligation: "The specific clause's conditions hold. s.7(a): data voluntarily given for a specified purpose and no objection indicated; stop when the person says so. s.7(b): State benefit or service with Sch.2 standards. s.7(i): employment or safeguarding the employer."
+    evidence_expected: ["mapping of purpose to clause with reasoning", "objection or opt-out handling for s.7(a)"]
+    controls: ["record objection under s.7(a) and stop that purpose"]
+    tests: ["recording an objection stops s.7(a) processing for that purpose"]
+    legal_review_when: ["s.7(a) is used for anything beyond what the person asked for", "s.7(b) or s.7(c) relied on (State status)"]
+    penalty_item: 7
+
+  # ---------- Notice ----------
+  - id: DPDP-NOT-01
+    title: Notice accompanies or precedes every consent request
+    area: notice
+    cites: ["Act s.5(1)", "Rules r.3"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent is the ground for at least one purpose"]
+    exceptions: ["purposes relying only on s.7 legitimate uses need no s.5 notice (Second Schedule notice items apply to s.7(b) State processing)", "Act s.17(3) notified classes"]
+    obligation: "Standalone, clear, plain notice with an itemised list of personal data, specific purposes and the goods, services or uses enabled, plus links or means to withdraw consent, exercise rights and complain to the Board."
+    evidence_expected: ["rendered notice at the point of consent", "notice content source", "notice version id"]
+    controls: ["versioned notice registry", "notice shown before the consent action"]
+    tests: ["consent cannot be recorded without a current notice version", "notice contains data items, purposes, and withdraw/rights/Board links"]
+    legal_review_when: ["notice wording is final"]
+    penalty_item: 7
+
+  - id: DPDP-NOT-02
+    title: Notice to users who consented before commencement
+    area: notice
+    cites: ["Act s.5(2)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent-based processing of users onboarded before the provision commenced"]
+    obligation: Give the s.5 notice as soon as reasonably practicable (email, in-app or similar). Processing may continue until withdrawal.
+    evidence_expected: ["legacy-user notice job or campaign record"]
+    tests: ["legacy users without an acknowledged notice version are identified"]
+    penalty_item: 7
+
+  - id: DPDP-NOT-03
+    title: Language option for notice and consent request
+    area: notice
+    cites: ["Act s.5(3)", "Act s.6(3)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["DPDP-NOT-01 applies"]
+    obligation: Offer the option to access the notice and consent request in English or any Eighth Schedule language.
+    evidence_expected: ["i18n mechanism for notice", "list of supported languages and decision record"]
+    legal_review_when: ["deciding which languages to offer"]
+    penalty_item: 7
+
+  # ---------- Consent ----------
+  - id: DPDP-CON-01
+    title: Valid consent (affirmative, specific, unbundled, necessary data only)
+    area: consent
+    cites: ["Act s.6(1)", "Act s.6(2)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent is the ground for a purpose"]
+    obligation: "Clear affirmative action, with no pre-ticked or default-on boxes. One choice per purpose, without bundling unrelated purposes. Limited to data necessary for the purpose. No clauses waiving rights."
+    evidence_expected: ["UI or API showing default-off per-purpose choices", "data collected per purpose"]
+    controls: ["per-purpose consent records", "default false"]
+    tests: ["default consent state is not granted", "service purposes do not require optional-purpose consent"]
+    penalty_item: 7
+
+  - id: DPDP-CON-02
+    title: Contact details in the consent request
+    area: consent
+    cites: ["Act s.6(3)", "Act s.8(9)", "Rules r.9"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent is the ground for a purpose"]
+    obligation: Show the DPO's or authorised person's contact details with the consent request.
+    evidence_expected: ["contact rendered in the consent UI"]
+    penalty_item: 7
+
+  - id: DPDP-CON-03
+    title: Withdrawal as easy as giving consent; processing and processors stop
+    area: consent
+    cites: ["Act s.6(4)", "Act s.6(5)", "Act s.6(6)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent is the ground for a purpose"]
+    obligation: Comparable-effort withdrawal. Stop processing for that purpose within reasonable time, and make processors stop, unless law requires or authorises continuing. Don't undo processing for completed transactions.
+    evidence_expected: ["withdrawal UI or API", "downstream propagation code (vendors, queues, caches)"]
+    controls: ["withdrawal event fans out to processors", "purpose gate checks current consent state at use time"]
+    tests: ["after withdrawal the purpose's code path no longer processes", "processor receives stop or erase signal"]
+    penalty_item: 7
+
+  - id: DPDP-CON-04
+    title: Provable notice and consent records
+    area: consent
+    cites: ["Act s.6(10)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["consent is the ground for a purpose"]
+    obligation: Be able to prove which notice was given and that valid consent was obtained.
+    evidence_expected: ["append-only consent ledger: subject ref, purpose, notice version, timestamp, channel, withdrawal timestamp"]
+    controls: ["consent ledger with no hard deletes of history while the retention basis lasts"]
+    tests: ["ledger records grant and withdrawal with notice version", "ledger is not editable through normal app paths"]
+    penalty_item: 7
+
+  - id: DPDP-CON-05
+    title: Consent Manager integration (only if used)
+    area: consent
+    cites: ["Act s.6(7)", "Act s.6(8)", "Act s.6(9)", "Rules r.4", "Rules Sch.1"]
+    commencement: "2026-11-13"
+    actor: fiduciary or consent-manager
+    triggers: ["the product integrates with, or acts as, a Consent Manager"]
+    obligation: Consent Managers must be registered with the Board and meet Sch.1 conditions. Fiduciaries accept consent actions relayed through them.
+    evidence_expected: ["integration spec", "registration evidence"]
+    legal_review_when: ["building a consent-manager product"]
+    penalty_item: 7
+
+  # ---------- General fiduciary duties ----------
+  - id: DPDP-FID-01
+    title: Processors engaged only under a valid contract; fiduciary stays responsible
+    area: processors
+    cites: ["Act s.8(1)", "Act s.8(2)", "Rules r.6(1)(f)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["a third party processes personal data on the fiduciary's behalf"]
+    obligation: Valid contract with each processor, including security safeguard provisions. Fiduciary remains responsible for processor actions.
+    evidence_expected: ["vendor register with role, data shared, region, contract reference"]
+    controls: ["vendor register in config", "allow-list of outbound data destinations"]
+    tests: ["no outbound personal-data call goes to a vendor missing from the register"]
+    legal_review_when: ["contract status unknown", "vendor role ambiguous"]
+    penalty_item: 7
+
+  - id: DPDP-FID-02
+    title: Accuracy where data drives decisions or is disclosed
+    area: data-quality
+    cites: ["Act s.8(3)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["data used to make a decision affecting the person", "data disclosed to another fiduciary"]
+    obligation: Ensure completeness, accuracy and consistency for those uses.
+    evidence_expected: ["validation at capture", "correction path", "source-of-truth controls"]
+    tests: ["corrections propagate to the decision or disclosure path"]
+    penalty_item: 7
+
+  - id: DPDP-FID-03
+    title: Appropriate technical and organisational measures
+    area: governance
+    cites: ["Act s.8(4)", "Rules r.6(1)(g)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Measures that make the other obligations effective (ownership, procedures, training, reviews).
+    evidence_expected: ["named owners", "runbooks", "review cadence"]
+    penalty_item: 7
+
+  # ---------- Security safeguards (Rules r.6(1)(a)-(g)) ----------
+  - id: DPDP-SEC-01
+    title: Protect data by encryption, obfuscation, masking or virtual tokens
+    area: security
+    cites: ["Act s.8(5)", "Rules r.6(1)(a)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    exceptions_note: "s.17(1) exemptions do not remove s.8(5)."
+    obligation: Appropriate data protection measures in transit and at rest, proportionate to risk.
+    evidence_expected: ["TLS config", "at-rest encryption (DB, disk, backups)", "field-level protection for high-risk fields", "password hashing"]
+    tests: ["plaintext secrets and passwords absent from storage", "high-risk fields not readable in plaintext where protection was planned"]
+    penalty_item: 1
+
+  - id: DPDP-SEC-02
+    title: Access control to computer resources
+    area: security
+    cites: ["Act s.8(5)", "Rules r.6(1)(b)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Authenticated, authorised, least-privilege access to personal data, including admin and service accounts.
+    evidence_expected: ["authz middleware or policies per route", "role model", "service-account scopes"]
+    tests: ["object-level authorisation (no IDOR)", "role escalation blocked", "unauthenticated access rejected"]
+    penalty_item: 1
+
+  - id: DPDP-SEC-03
+    title: Logging, monitoring and review of access to detect unauthorised access
+    area: security
+    cites: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Logs that make access visible, with monitoring and review to detect, investigate and remediate unauthorised access.
+    evidence_expected: ["access/audit log of personal-data reads and writes", "alerting", "review procedure"]
+    controls: ["audit events reference subject IDs, not copied personal data"]
+    tests: ["access to personal data produces an audit event", "audit events contain no raw contact or health data"]
+    penalty_item: 1
+
+  - id: DPDP-SEC-04
+    title: Continuity of processing (backups and recovery)
+    area: security
+    cites: ["Act s.8(5)", "Rules r.6(1)(d)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Measures such as backups so processing can continue after loss of confidentiality, integrity or availability.
+    evidence_expected: ["backup config", "restore test record", "backup encryption"]
+    tests: ["documented restore test"]
+    penalty_item: 1
+
+  - id: DPDP-SEC-05
+    title: Retain logs and personal data for one year for detection and investigation
+    area: security
+    cites: ["Rules r.6(1)(e)", "Rules r.8(3)", "Rules Sch.7"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Keep personal data, associated traffic data and processing logs for at least one year from processing (also for Sch.7 purposes), unless law requires otherwise. Erasure flows must not destroy these early. Afterwards erase unless law requires retention.
+    evidence_expected: ["log retention config at least 365 days", "restricted retention store for logs surviving account erasure", "purge after the period"]
+    controls: ["separate, access-restricted retention store", "erasure keeps processing logs younger than one year"]
+    tests: ["erasure keeps processing logs younger than one year", "purge removes logs older than the retention period"]
+    legal_review_when: ["deciding exactly which fields are retained versus erased"]
+    penalty_item: 1
+
+  - id: DPDP-SEC-06
+    title: Security provisions in processor contracts
+    area: security
+    cites: ["Act s.8(5)", "Rules r.6(1)(f)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["DPDP-FID-01 applies"]
+    obligation: Contracts with processors include provisions for reasonable security safeguards.
+    evidence_expected: ["contract or DPA reference per vendor"]
+    legal_review_when: ["always (contract review is legal work)"]
+    penalty_item: 1
+
+  # ---------- Breach ----------
+  - id: DPDP-BRE-01
+    title: Notify each affected Data Principal of a breach
+    area: breach
+    cites: ["Act s.8(6)", "Rules r.7(1)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: "Without delay, concisely, via user account or registered contact, tell each affected person: nature, extent, timing and location; likely consequences; mitigation; safety steps for them; contact for queries."
+    evidence_expected: ["incident runbook", "notification template with all r.7(1) items", "ability to identify affected users from logs"]
+    tests: ["template contains all r.7(1) items", "affected-user query works from audit data"]
+    penalty_item: 2
+
+  - id: DPDP-BRE-02
+    title: Notify the Board without delay and give a detailed report within 72 hours
+    area: breach
+    cites: ["Act s.8(6)", "Rules r.7(2)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: "Initial intimation without delay (nature, extent, timing, location, likely impact). Within 72 hours of awareness, or longer if the Board allows on request: updated details, causes, mitigation, findings on who caused it, remediation, and a report on notices to principals."
+    evidence_expected: ["detection-to-escalation path with timestamps (awareness time recorded)", "Board report template"]
+    tests: ["incident record captures awareness timestamp and computes the 72h deadline"]
+    penalty_item: 2
+
+  # ---------- Retention and erasure ----------
+  - id: DPDP-RET-01
+    title: Erase on withdrawal or when the purpose is served, including at processors
+    area: retention
+    cites: ["Act s.8(7)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    exceptions: ["retention required by another law", "Act s.17(4) (State)", "Act s.17(3) notified classes", "Rules r.8(3) one-year minimum for logs"]
+    obligation: Erase on withdrawal of consent, or as soon as it is reasonable to assume the purpose is no longer served (whichever is earlier). Make processors erase too.
+    evidence_expected: ["retention schedule per data category with basis", "erasure job or workflow", "processor erasure calls"]
+    controls: ["configurable retention per category", "erasure cascade covering derived data, caches, search and vector indexes"]
+    tests: ["erasure removes primary and derived records", "erasure request reaches processors", "legally retained records are kept and justified"]
+    penalty_item: 7
+
+  - id: DPDP-RET-02
+    title: Three-year inactivity erasure with 48-hour notice (Sch.3 classes only)
+    area: retention
+    cites: ["Act s.8(8)", "Act s.8(11)", "Rules r.8(1)", "Rules r.8(2)", "Rules Sch.3"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["fiduciary is an e-commerce entity with at least 2 crore registered users in India, an online gaming intermediary with at least 50 lakh, or a social media intermediary with at least 2 crore"]
+    obligation: Erase after 3 years without contact (from last contact or Rules commencement, whichever is later), except for account access and issued virtual tokens. Notify at least 48 hours before erasure.
+    evidence_expected: ["last-contact tracking", "purge job", "48h notice job"]
+    tests: ["users past the inactivity period get notice at least 48h before purge", "login cancels the purge"]
+    penalty_item: 7
+
+  # ---------- Contact and grievance ----------
+  - id: DPDP-GRV-01
+    title: Publish a contact person for processing questions
+    area: grievance
+    cites: ["Act s.8(9)", "Rules r.9"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Publish prominently on the website or app the DPO's (if any) or a responsible person's business contact, and include it in every rights response.
+    evidence_expected: ["contact on site or app", "contact in response templates"]
+    tests: ["contact rendered on the public page", "rights responses include contact"]
+    penalty_item: 7
+
+  - id: DPDP-GRV-02
+    title: Grievance redressal within the published period (at most 90 days)
+    area: grievance
+    cites: ["Act s.8(10)", "Act s.13", "Rules r.14(3)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Effective, published grievance mechanism with a response period of no more than 90 days.
+    evidence_expected: ["intake channel", "ticket with due date", "published timeline"]
+    tests: ["grievance gets a due date at most the configured period, which is at most 90 days"]
+    penalty_item: 7
+
+  # ---------- Children and guardians ----------
+  - id: DPDP-CHD-01
+    title: Verifiable parental consent before processing a child's data
+    area: children
+    cites: ["Act s.2(f)", "Act s.9(1)", "Rules r.10"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["users or data subjects may be under 18"]
+    exceptions: ["Rules r.12 and Sch.4 Part A classes or Part B purposes, within their limiting conditions"]
+    obligation: Obtain verifiable consent of a parent shown to be an identifiable adult, via data already held or a token from an authorised entity.
+    evidence_expected: ["age signal at onboarding", "parent verification flow", "Sch.4 exemption analysis if relied on"]
+    tests: ["child account cannot activate consent-based processing without verified parental consent"]
+    legal_review_when: ["always when minors are possible", "an Sch.4 exemption is relied on"]
+    penalty_item: 3
+
+  - id: DPDP-CHD-02
+    title: No tracking, behavioural monitoring or targeted ads directed at children; no detrimental processing
+    area: children
+    cites: ["Act s.9(2)", "Act s.9(3)", "Rules r.12", "Rules Sch.4"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["users or data subjects may be under 18"]
+    exceptions: ["Sch.4 classes or purposes within their limits (s.9(3) only; s.9(2) has no exemption)"]
+    obligation: Disable behavioural analytics, profiling and targeted advertising for children unless an Sch.4 exemption applies. Avoid processing likely to harm a child's well-being.
+    evidence_expected: ["analytics and ads gating by age status"]
+    tests: ["no tracking or ad events emitted for child accounts"]
+    legal_review_when: ["always when minors are possible"]
+    penalty_item: 3
+
+  - id: DPDP-CHD-03
+    title: Lawful guardian verification for persons with disability
+    area: children
+    cites: ["Act s.2(j)", "Act s.9(1)", "Rules r.11"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["service may act on consent from a lawful guardian of a person with disability"]
+    obligation: Due diligence that the guardian was appointed by a court, designated authority or local-level committee under the applicable guardianship law.
+    evidence_expected: ["guardian verification workflow"]
+    legal_review_when: ["always"]
+    penalty_item: 3
+
+  # ---------- Significant Data Fiduciary ----------
+  - id: DPDP-SDF-01
+    title: Significant Data Fiduciary obligations
+    area: sdf
+    cites: ["Act s.10", "Rules r.13"]
+    commencement: "2027-05-13"
+    actor: significant-data-fiduciary
+    triggers: ["the Central Government has notified this fiduciary or its class as an SDF (evidence of notification required)"]
+    obligation: DPO based in India, independent data auditor, DPIA and audit every 12 months with report to the Board, algorithmic due diligence, and processing in India of data a government committee specifies.
+    evidence_expected: ["notification reference"]
+    legal_review_when: ["always"]
+    penalty_item: 4
+
+  # ---------- Data Principal rights ----------
+  - id: DPDP-RGT-01
+    title: Publish how to exercise rights and the identifiers needed
+    area: rights
+    cites: ["Rules r.14(1)", "Rules r.14(2)", "Rules r.14(5)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["any rights under s.11-14 apply"]
+    obligation: Publish the means (link, form, email) and the identifiers required.
+    evidence_expected: ["rights page or settings entry"]
+    penalty_item: 7
+
+  - id: DPDP-RGT-02
+    title: Access right (summary of data, processing, and recipients)
+    area: rights
+    cites: ["Act s.11"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["processing based on consent, including s.7(a)"]
+    exceptions: ["processing only on s.7(b)-(i) grounds", "sharing with authorised investigators on written request (s.11(2))", "Act s.17(1) and s.17(3) cases"]
+    obligation: On request, provide a summary of personal data and processing, and identities of other fiduciaries and processors it was shared with, with a description of what was shared.
+    evidence_expected: ["access-summary function", "recipient register"]
+    tests: ["summary lists data categories and recipients for the requesting user only", "another user cannot request someone else's summary"]
+    penalty_item: 7
+
+  - id: DPDP-RGT-03
+    title: Correction, completion, updating and erasure on request
+    area: rights
+    cites: ["Act s.12"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["processing based on consent, including s.7(a)"]
+    exceptions: ["erasure refused where needed for the specified purpose or by law", "Act s.17(4) for State"]
+    obligation: Correct, complete and update on request. Erase on request unless retention is necessary.
+    evidence_expected: ["correction path", "erasure request path", "refusal reasons recorded"]
+    tests: ["correction updates all copies", "erasure request triggers the DPDP-RET-01 cascade"]
+    penalty_item: 7
+
+  - id: DPDP-RGT-04
+    title: Nomination
+    area: rights
+    cites: ["Act s.14", "Rules r.14(4)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["any rights under s.11-14 apply"]
+    obligation: Allow nominating one or more persons to exercise rights on death or incapacity.
+    evidence_expected: ["nominee capture and verification procedure"]
+    penalty_item: 7
+
+  # ---------- Cross-border ----------
+  - id: DPDP-XB-01
+    title: Cross-border transfer restrictions
+    area: cross-border
+    cites: ["Act s.16", "Rules r.15", "Rules r.13(4)"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed or stored outside India (including by vendors)"]
+    obligation: No transfer to a country restricted by notification. Follow any Central Government orders under r.15, sectoral laws (s.16(2)), and r.13(4) if an SDF.
+    evidence_expected: ["data residency map per vendor and region", "check of current notifications"]
+    legal_review_when: ["any regulated sector (finance, health, telecom, insurance)", "a notification exists"]
+    penalty_item: 7
+
+  # ---------- Government requests ----------
+  - id: DPDP-GOV-01
+    title: Handling Central Government information requests
+    area: governance
+    cites: ["Act s.36", "Rules r.23", "Rules Sch.7"]
+    commencement: "2027-05-13"
+    actor: fiduciary
+    triggers: ["personal data processed"]
+    obligation: Ability to respond to authorised requests within the specified period, and to honour non-disclosure directions.
+    evidence_expected: ["runbook naming owner"]
+    legal_review_when: ["always"]
+    penalty_item: 7

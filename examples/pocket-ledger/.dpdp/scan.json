@@ -1,0 +1,19 @@
+{
+  "tool": "dpdp scan_personal_data",
+  "root": ".",
+  "files_scanned": 5,
+  "note": "Signals are leads, not facts. Confirm each by reading the code before recording evidence. 'weak' = hit in tests/docs/fixtures.",
+  "counts": {
+    "existing_controls.notice_policy": 1
+  },
+  "signals": {
+    "existing_controls.notice_policy": [
+      {
+        "file": "README.md",
+        "line": 5,
+        "match": "DPDP",
+        "weak": true
+      }
+    ]
+  }
+}

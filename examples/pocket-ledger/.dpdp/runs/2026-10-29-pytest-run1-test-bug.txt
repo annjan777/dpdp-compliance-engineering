@@ -1,0 +1,24 @@
+..F                                                                      [100%]
+=================================== FAILURES ===================================
+________________ test_export_default_is_private_and_not_in_temp ________________
+
+tmp_path = PosixPath('/tmp/pytest-of-root/pytest-1/test_export_default_is_private0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7fef5d0588a0>
+
+    def test_export_default_is_private_and_not_in_temp(tmp_path, monkeypatch):
+        import os, stat, tempfile
+        monkeypatch.setenv("HOME", str(tmp_path))
+        db = core.connect(str(tmp_path / "l.db"))
+        core.add(db, "2026-10-01", 10, "tea")
+        p = core.export_csv(db)
+>       assert not p.startswith(tempfile.gettempdir())
+E       AssertionError: assert not True
+E        +  where True = <built-in method startswith of str object at 0x7fef5d09c830>('/tmp')
+E        +    where <built-in method startswith of str object at 0x7fef5d09c830> = '/tmp/pytest-of-root/pytest-1/test_export_default_is_private0/pocket-ledger-export.csv'.startswith
+E        +    and   '/tmp' = <function gettempdir at 0x7fef5d972f20>()
+E        +      where <function gettempdir at 0x7fef5d972f20> = <module 'tempfile' from '/usr/local/lib/python3.13/tempfile.py'>.gettempdir
+
+tests/test_core.py:24: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_core.py::test_export_default_is_private_and_not_in_temp - A...
+1 failed, 2 passed in 0.07s

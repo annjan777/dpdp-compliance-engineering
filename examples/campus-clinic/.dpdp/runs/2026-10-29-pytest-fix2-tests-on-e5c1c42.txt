@@ -1,0 +1,35 @@
+...................FF                                                    [100%]
+=================================== FAILURES ===================================
+_________ test_erasure_does_not_send_non_subscriber_email_to_provider __________
+
+    def test_erasure_does_not_send_non_subscriber_email_to_provider():
+        # F-20 regression (independent review round 2)
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.delete_user(db, a, a)
+>       assert vendors.OUTBOX == [] or all(k != "email-erasure" for k, _, _ in vendors.OUTBOX)
+E       AssertionError: assert ([('analytics'...ample.test'})] == []
+E         
+E         Left contains 2 more items, first extra item: ('analytics', 'https://api.analytics-vendor.example/v1/events', {'event': 'appointment_booked', 'date': '2027-01-10'})
+E         Use -v to get more diff or False)
+E        +  where False = all(<generator object test_erasure_does_not_send_non_subscriber_email_to_provider.<locals>.<genexpr> at 0x7f3c37ab12a0>)
+
+tests/test_privacy_controls.py:179: AssertionError
+_____________________ test_failed_erasure_changes_nothing ______________________
+
+    def test_failed_erasure_changes_nothing():
+        # F-21 regression: with foreign keys enforced the users DELETE fails; consent must not be half-withdrawn
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.grant_consent(db, a, "PA-02", NV)
+        db.execute("PRAGMA foreign_keys=ON")
+        with pytest.raises(Exception):
+            app.delete_user(db, a, a)
+>       assert app.has_consent(db, a, "PA-02")
+E       AssertionError: assert False
+E        +  where False = <function has_consent at 0x7f3c37a5af20>(<sqlite3.Connection object at 0x7f3c37b97b50>, 1, 'PA-02')
+E        +    where <function has_consent at 0x7f3c37a5af20> = app.has_consent
+
+tests/test_privacy_controls.py:189: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_privacy_controls.py::test_erasure_does_not_send_non_subscriber_email_to_provider
+FAILED tests/test_privacy_controls.py::test_failed_erasure_changes_nothing - ...
+2 failed, 19 passed in 0.08s

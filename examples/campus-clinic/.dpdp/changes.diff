@@ -1,0 +1,475 @@
+diff --git a/clinic/app.py b/clinic/app.py
+index 2d77050..6e3e9a2 100644
+--- a/clinic/app.py
++++ b/clinic/app.py
+@@ -1,14 +1,19 @@
+ import logging
+ import sqlite3
+-from datetime import datetime, timezone
++from datetime import datetime, timedelta, timezone
+ 
+-from clinic import vendors
++from clinic import notices, register as processing_register, vendors
+ 
+ log = logging.getLogger("clinic")
+ 
++CLINICIAN = "clinician"
++# Appointments are kept on account erasure until legal confirms the medical-records retention rule (Q-03).
++RETAIN_APPOINTMENTS_ON_ERASURE = True
++PROCESSING_LOG_RETENTION_DAYS = 365  # Rules r.8(3) minimum
++
+ 
+ def now():
+-    return datetime.now(timezone.utc).isoformat()
++    return datetime.now(timezone.utc)
+ 
+ 
+ def init_db(path=":memory:"):
+@@ -17,14 +22,13 @@ def init_db(path=":memory:"):
+     db.executescript(
+         """
+         CREATE TABLE users (
+-            id INTEGER PRIMARY KEY,
++            id INTEGER PRIMARY KEY AUTOINCREMENT,  -- ids are never reused after erasure
+             name TEXT NOT NULL,
+             email TEXT NOT NULL UNIQUE,
+             phone TEXT,
+             dob TEXT,
+             roll_no TEXT,
+-            role TEXT NOT NULL DEFAULT 'patient',
+-            marketing_opt_in INTEGER NOT NULL DEFAULT 1
++            role TEXT NOT NULL DEFAULT 'patient'
+         );
+         CREATE TABLE appointments (
+             id INTEGER PRIMARY KEY,
+@@ -32,41 +36,154 @@ def init_db(path=":memory:"):
+             slot TEXT NOT NULL,
+             symptoms TEXT
+         );
++        -- append-only consent ledger (Act s.6(10)); current state = latest event per user and purpose
++        CREATE TABLE consents (
++            id INTEGER PRIMARY KEY,
++            user_id INTEGER NOT NULL,
++            purpose_id TEXT NOT NULL,
++            notice_version TEXT NOT NULL,
++            status TEXT NOT NULL CHECK (status IN ('granted', 'withdrawn')),
++            at TEXT NOT NULL
++        );
++        -- processing log: identifiers and actions only, kept >= 1 year (Rules r.8(3))
++        CREATE TABLE processing_log (
++            id INTEGER PRIMARY KEY,
++            user_id INTEGER,
++            actor_id INTEGER,
++            action TEXT NOT NULL,
++            at TEXT NOT NULL
++        );
+         """
+     )
+     return db
+ 
+ 
+-def register(db, name, email, phone, dob, roll_no, marketing_opt_in=True):
++def _plog(db, action, user_id, actor_id=None, at=None):
++    db.execute("INSERT INTO processing_log(user_id,actor_id,action,at) VALUES (?,?,?,?)",
++               (user_id, actor_id, action, (at or now()).isoformat()))
++
++
++def register(db, name, email, phone, dob, roll_no, marketing_opt_in=False, notice_version=None):
++    if marketing_opt_in:
++        _check_notice("PA-02", notice_version)  # fail before any row is written
+     cur = db.execute(
+-        "INSERT INTO users(name,email,phone,dob,roll_no,marketing_opt_in) VALUES (?,?,?,?,?,?)",
+-        (name, email, phone, dob, roll_no, int(marketing_opt_in)),
++        "INSERT INTO users(name,email,phone,dob,roll_no) VALUES (?,?,?,?,?)",
++        (name, email, phone, dob, roll_no),
+     )
++    uid = cur.lastrowid
++    _plog(db, "register", uid, uid)
++    if marketing_opt_in:
++        grant_consent(db, uid, "PA-02", notice_version)
+     db.commit()
+-    log.info("registered user %s %s %s", name, email, phone)
+-    return cur.lastrowid
++    log.info("registered user id=%s", uid)
++    return uid
++
++
++def _check_notice(purpose_id, notice_version):
++    if notice_version != notices.CURRENT.get(purpose_id):
++        raise ValueError("consent must be recorded against the current notice version")
++
++
++def grant_consent(db, user_id, purpose_id, notice_version):
++    _check_notice(purpose_id, notice_version)
++    db.execute("INSERT INTO consents(user_id,purpose_id,notice_version,status,at) VALUES (?,?,?,?,?)",
++               (user_id, purpose_id, notice_version, "granted", now().isoformat()))
++    db.commit()
++
++
++def withdraw_consent(db, user_id, purpose_id):
++    last = db.execute("SELECT notice_version FROM consents WHERE user_id=? AND purpose_id=? ORDER BY id DESC LIMIT 1",
++                      (user_id, purpose_id)).fetchone()
++    db.execute("INSERT INTO consents(user_id,purpose_id,notice_version,status,at) VALUES (?,?,?,?,?)",
++               (user_id, purpose_id, last["notice_version"] if last else "none", "withdrawn", now().isoformat()))
++    db.commit()
++
++
++def has_consent(db, user_id, purpose_id):
++    row = db.execute("SELECT status FROM consents WHERE user_id=? AND purpose_id=? ORDER BY id DESC LIMIT 1",
++                     (user_id, purpose_id)).fetchone()
++    return bool(row) and row["status"] == "granted"
++
++
++def _authorise(db, requester_id, user_id):
++    if requester_id == user_id:
++        return
++    row = db.execute("SELECT role FROM users WHERE id=?", (requester_id,)).fetchone()
++    if not row or row["role"] != CLINICIAN:
++        raise PermissionError("not allowed to access this user's records")
+ 
+ 
+ def book_appointment(db, user_id, slot, symptoms):
+     cur = db.execute("INSERT INTO appointments(user_id,slot,symptoms) VALUES (?,?,?)", (user_id, slot, symptoms))
++    _plog(db, "book_appointment", user_id, user_id)
+     db.commit()
+-    user = db.execute("SELECT * FROM users WHERE id=?", (user_id,)).fetchone()
+-    vendors.send_to_analytics({"event": "appointment_booked", "email": user["email"], "symptoms": symptoms, "slot": slot})
++    vendors.send_to_analytics({"event": "appointment_booked", "date": slot[:10]})
+     return cur.lastrowid
+ 
+ 
+ def get_appointments(db, requester_id, user_id):
++    _authorise(db, requester_id, user_id)
++    _plog(db, "view_appointments", user_id, requester_id)
++    db.commit()
+     return [dict(r) for r in db.execute("SELECT * FROM appointments WHERE user_id=?", (user_id,))]
+ 
+ 
+ def send_newsletter(db, subject, body):
+     sent = 0
+-    for u in db.execute("SELECT email FROM users WHERE marketing_opt_in=1"):
+-        vendors.send_email(u["email"], subject, body)
+-        sent += 1
++    for u in db.execute("SELECT id, email FROM users"):
++        if has_consent(db, u["id"], "PA-02"):
++            vendors.send_email(u["email"], subject, body)
++            sent += 1
+     return sent
+ 
+ 
+-def delete_user(db, user_id):
+-    db.execute("DELETE FROM users WHERE id=?", (user_id,))
++def _ever_consented(db, user_id, purpose_id):
++    return db.execute("SELECT 1 FROM consents WHERE user_id=? AND purpose_id=? AND status='granted' LIMIT 1",
++                      (user_id, purpose_id)).fetchone() is not None
++
++
++def access_summary(db, requester_id, user_id):
++    """Act s.11: summary of data, processing and recipients (not a full export). Owner only."""
++    if requester_id != user_id:
++        raise PermissionError("access summaries are only given to the data principal")
++    n_appts = db.execute("SELECT COUNT(*) FROM appointments WHERE user_id=?", (user_id,)).fetchone()[0]
++    purposes = [dict(id=k, **v) for k, v in processing_register.PURPOSES.items()
++                if k != "PA-02" or has_consent(db, user_id, "PA-02")]
++    shared = {"analytics": n_appts > 0, "email": _ever_consented(db, user_id, "PA-02")}
++    recipients = [r for r in processing_register.RECIPIENTS if shared[r["key"]]]
++    return {"purposes": purposes, "appointments_held": n_appts, "recipients": recipients}
++
++
++def delete_user(db, requester_id, user_id):
++    if requester_id != user_id:
++        raise PermissionError("only the account holder can erase their account")
++    row = db.execute("SELECT email FROM users WHERE id=?", (user_id,)).fetchone()
++    if not row:
++        return
++    email_shared = _ever_consented(db, user_id, "PA-02")  # provider only ever received subscribers' addresses
++    try:  # one transaction: either the whole erasure happens or nothing does
++        for (purpose_id,) in db.execute("SELECT DISTINCT purpose_id FROM consents WHERE user_id=?", (user_id,)).fetchall():
++            if has_consent(db, user_id, purpose_id):  # close open consents; ledger history kept as proof (s.6(10))
++                db.execute("INSERT INTO consents(user_id,purpose_id,notice_version,status,at) "
++                           "SELECT user_id,purpose_id,notice_version,'withdrawn',? FROM consents "
++                           "WHERE user_id=? AND purpose_id=? ORDER BY id DESC LIMIT 1",
++                           (now().isoformat(), user_id, purpose_id))
++        if not RETAIN_APPOINTMENTS_ON_ERASURE:
++            db.execute("DELETE FROM appointments WHERE user_id=?", (user_id,))
++        db.execute("DELETE FROM users WHERE id=?", (user_id,))
++        _plog(db, "erase_account", user_id, requester_id)
++        db.commit()
++    except Exception:
++        db.rollback()
++        raise
++    # Analytics now receives no identifiers, so there is nothing per-user to erase there;
++    # historical identifying payloads need a one-off vendor deletion request (R-01).
++    if email_shared:
++        vendors.request_email_erasure(row["email"])
++
++
++def purge_processing_log(db, retention_days=PROCESSING_LOG_RETENTION_DAYS, at=None):
++    cutoff = ((at or now()) - timedelta(days=retention_days)).isoformat()
++    n = db.execute("DELETE FROM processing_log WHERE at < ?", (cutoff,)).rowcount
+     db.commit()
++    return n
+diff --git a/clinic/notices.py b/clinic/notices.py
+new file mode 100644
+index 0000000..59a2c44
+--- /dev/null
++++ b/clinic/notices.py
+@@ -0,0 +1,14 @@
++"""Versioned notices (Act s.5, Rules r.3). Wording is a placeholder pending legal approval (plan P-06)."""
++NOTICES = {
++    "newsletter-v1": {
++        "purpose_id": "PA-02",
++        "language": "en",
++        "items": ["name", "email address"],
++        "purposes": ["Sending the health centre's health-awareness newsletter"],
++        "withdraw": "/privacy/consents",
++        "rights": "/privacy/requests",
++        "board_complaint": "https://www.dpb.gov.in (placeholder - confirm)",
++        "status": "DRAFT - wording pending legal approval",
++    }
++}
++CURRENT = {"PA-02": "newsletter-v1"}
+diff --git a/clinic/register.py b/clinic/register.py
+new file mode 100644
+index 0000000..f6a7a35
+--- /dev/null
++++ b/clinic/register.py
+@@ -0,0 +1,10 @@
++"""Processing register: purposes, grounds and recipients (used by access summaries and tests)."""
++PURPOSES = {
++    "PA-01": {"purpose": "Book and manage clinic appointments", "ground": "s.7(a) (pending legal confirmation, Q-05)",
++              "data": ["name", "email", "phone", "date of birth", "roll number", "appointment slot", "symptoms"]},
++    "PA-02": {"purpose": "Health newsletter emails", "ground": "consent", "data": ["name", "email"]},
++}
++RECIPIENTS = [
++    {"key": "analytics", "name": "Analytics vendor", "role": "processor", "region": "outside India", "data": ["booking event", "appointment date"]},
++    {"key": "email", "name": "Email provider", "role": "processor", "region": "unknown", "data": ["email address"]},
++]
+diff --git a/clinic/vendors.py b/clinic/vendors.py
+index b7be769..a862207 100644
+--- a/clinic/vendors.py
++++ b/clinic/vendors.py
+@@ -8,5 +8,9 @@ def send_to_analytics(payload):
+     OUTBOX.append(("analytics", ANALYTICS_URL, dict(payload)))
+ 
+ 
++def request_email_erasure(email):
++    OUTBOX.append(("email-erasure", "email-provider", {"email": email}))
++
++
+ def send_email(to, subject, body):
+     OUTBOX.append(("email", to, subject))
+diff --git a/tests/test_app.py b/tests/test_app.py
+index 4e887aa..a2bf818 100644
+--- a/tests/test_app.py
++++ b/tests/test_app.py
+@@ -1,4 +1,4 @@
+-from clinic import app, vendors
++from clinic import app, notices, vendors
+ 
+ 
+ def setup_function():
+@@ -15,5 +15,6 @@ def test_register_and_book():
+ 
+ def test_newsletter_sends():
+     db = app.init_db()
+-    app.register(db, "A", "a@example.test", None, None, None)
++    app.register(db, "A", "a@example.test", None, None, None, marketing_opt_in=True,
++                 notice_version=notices.CURRENT["PA-02"])
+     assert app.send_newsletter(db, "Flu season", "tips") == 1
+diff --git a/tests/test_privacy_controls.py b/tests/test_privacy_controls.py
+new file mode 100644
+index 0000000..09ffc8e
+--- /dev/null
++++ b/tests/test_privacy_controls.py
+@@ -0,0 +1,190 @@
++"""Tests for the DPDP plan items P-01..P-04, P-07, P-08 (see .dpdp/assessment.yaml)."""
++import logging
++from datetime import timedelta
++
++import pytest
++
++from clinic import app, notices, vendors
++
++NV = notices.CURRENT["PA-02"]
++
++
++def setup_function():
++    vendors.OUTBOX.clear()
++
++
++def _db_with_two_patients_and_clinician():
++    db = app.init_db()
++    a = app.register(db, "Patient A", "a@example.test", "0000000001", "2002-02-02", "R-A")
++    b = app.register(db, "Patient B", "b@example.test", "0000000002", "2003-03-03", "R-B")
++    c = app.register(db, "Dr C", "c@example.test", None, None, None)
++    db.execute("UPDATE users SET role='clinician' WHERE id=?", (c,))
++    db.commit()
++    app.book_appointment(db, a, "2027-01-10T10:00", "fever")
++    return db, a, b, c
++
++
++# P-01 / DPDP-SEC-02: object-level authorisation
++def test_patient_cannot_read_other_patients_appointments():
++    db, a, b, _ = _db_with_two_patients_and_clinician()
++    with pytest.raises(PermissionError):
++        app.get_appointments(db, b, a)
++
++
++def test_unknown_requester_rejected():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    with pytest.raises(PermissionError):
++        app.get_appointments(db, 9999, a)
++
++
++def test_clinician_and_owner_can_read():
++    db, a, _, c = _db_with_two_patients_and_clinician()
++    assert len(app.get_appointments(db, a, a)) == 1
++    assert len(app.get_appointments(db, c, a)) == 1
++
++
++# P-02: no contact data in application logs
++def test_registration_log_has_no_contact_data(caplog):
++    db = app.init_db()
++    with caplog.at_level(logging.INFO, logger="clinic"):
++        app.register(db, "Patient Z", "z@example.test", "0000000009", None, None)
++    text = caplog.text
++    assert "z@example.test" not in text and "0000000009" not in text and "Patient Z" not in text
++
++
++# P-03 / DPDP-FID-01 minimisation: analytics payload carries no identifiers or health text
++def test_analytics_payload_minimised():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    payloads = [p for kind, _, p in vendors.OUTBOX if kind == "analytics"]
++    assert payloads == [{"event": "appointment_booked", "date": "2027-01-10"}]
++
++
++# P-04 / DPDP-CON-01, CON-03, CON-04, NOT-01
++def test_marketing_consent_defaults_to_not_granted():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    assert not app.has_consent(db, a, "PA-02")
++    assert app.send_newsletter(db, "s", "b") == 0
++
++
++def test_consent_requires_current_notice_version():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    with pytest.raises(ValueError):
++        app.grant_consent(db, a, "PA-02", "old-notice")
++
++
++def test_withdrawal_stops_newsletter_and_ledger_keeps_history():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.grant_consent(db, a, "PA-02", NV)
++    assert app.send_newsletter(db, "s", "b") == 1
++    app.withdraw_consent(db, a, "PA-02")
++    vendors.OUTBOX.clear()
++    assert app.send_newsletter(db, "s", "b") == 0
++    rows = db.execute("SELECT status, notice_version FROM consents WHERE user_id=? ORDER BY id", (a,)).fetchall()
++    assert [(r["status"], r["notice_version"]) for r in rows] == [("granted", NV), ("withdrawn", NV)]
++
++
++def test_core_service_works_without_optional_consent():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    assert app.book_appointment(db, a, "2027-02-01T09:00", "cough")
++
++
++def test_notice_has_required_elements():
++    n = notices.NOTICES[NV]
++    assert n["items"] and n["purposes"] and n["withdraw"] and n["rights"] and n["board_complaint"]
++
++
++# P-07 / DPDP-RET-01, SEC-05: erasure reaches processor; processing log survives one year then purges
++def test_erasure_removes_account_and_notifies_email_processor():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.grant_consent(db, a, "PA-02", NV)
++    app.delete_user(db, a, a)
++    assert db.execute("SELECT COUNT(*) FROM users WHERE id=?", (a,)).fetchone()[0] == 0
++    assert ("email-erasure", "email-provider", {"email": "a@example.test"}) in vendors.OUTBOX
++    assert not any(k == "analytics-erasure" for k, _, _ in vendors.OUTBOX)
++
++
++def test_only_account_holder_can_erase():
++    db, a, b, c = _db_with_two_patients_and_clinician()
++    for other in (b, c):
++        with pytest.raises(PermissionError):
++            app.delete_user(db, other, a)
++
++
++def test_erased_ids_are_not_reused_and_nothing_carries_over():
++    # F-13 regression (independent review): new user must not inherit an erased user's records or consent
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.grant_consent(db, a, "PA-02", NV)
++    app.delete_user(db, a, a)
++    new = app.register(db, "Patient N", "n@example.test", None, None, None)
++    assert new != a
++    assert app.get_appointments(db, new, new) == []
++    assert not app.has_consent(db, new, "PA-02")
++    assert app.access_summary(db, new, new)["appointments_held"] == 0
++    vendors.OUTBOX.clear()
++    assert app.send_newsletter(db, "s", "b") == 0
++    assert not app.has_consent(db, a, "PA-02")
++
++
++def test_failed_consent_does_not_leave_half_registered_user():
++    db = app.init_db()
++    with pytest.raises(ValueError):
++        app.register(db, "X", "x@example.test", None, None, None, marketing_opt_in=True, notice_version="stale")
++    db.commit()
++    assert db.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 0
++
++
++def test_erasure_keeps_recent_processing_log_and_purge_removes_old():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.delete_user(db, a, a)
++    assert db.execute("SELECT COUNT(*) FROM processing_log WHERE user_id=?", (a,)).fetchone()[0] >= 3
++    assert app.purge_processing_log(db) == 0
++    later = app.now() + timedelta(days=366)
++    assert app.purge_processing_log(db, at=later) > 0
++    assert db.execute("SELECT COUNT(*) FROM processing_log").fetchone()[0] == 0
++
++
++def test_processing_log_holds_no_contact_or_health_data():
++    db, a, _, c = _db_with_two_patients_and_clinician()
++    app.get_appointments(db, c, a)
++    dump = " ".join(str(tuple(r)) for r in db.execute("SELECT * FROM processing_log"))
++    assert "example.test" not in dump and "fever" not in dump
++
++
++# P-08 / DPDP-RGT-02: access summary for own data only
++def test_access_summary_lists_purposes_and_recipients():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    s = app.access_summary(db, a, a)
++    assert {p["id"] for p in s["purposes"]} == {"PA-01"}
++    assert s["appointments_held"] == 1
++    assert [r["key"] for r in s["recipients"]] == ["analytics"]  # no newsletter consent -> email provider not listed
++
++
++def test_access_summary_lists_email_provider_once_consented():
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.grant_consent(db, a, "PA-02", NV)
++    assert {r["key"] for r in app.access_summary(db, a, a)["recipients"]} == {"analytics", "email"}
++
++
++def test_access_summary_denied_for_other_user_and_clinician():
++    db, a, b, c = _db_with_two_patients_and_clinician()
++    for other in (b, c):
++        with pytest.raises(PermissionError):
++            app.access_summary(db, other, a)
++
++
++def test_erasure_does_not_send_non_subscriber_email_to_provider():
++    # F-20 regression (independent review round 2)
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.delete_user(db, a, a)
++    assert vendors.OUTBOX == [] or all(k != "email-erasure" for k, _, _ in vendors.OUTBOX)
++
++
++def test_failed_erasure_changes_nothing():
++    # F-21 regression: with foreign keys enforced the users DELETE fails; consent must not be half-withdrawn
++    db, a, _, _ = _db_with_two_patients_and_clinician()
++    app.grant_consent(db, a, "PA-02", NV)
++    db.execute("PRAGMA foreign_keys=ON")
++    with pytest.raises(Exception):
++        app.delete_user(db, a, a)
++    assert app.has_consent(db, a, "PA-02")
++    assert db.execute("SELECT COUNT(*) FROM users WHERE id=?", (a,)).fetchone()[0] == 1

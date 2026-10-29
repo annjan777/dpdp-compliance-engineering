@@ -1,0 +1,154 @@
+# DPDP engineering assessment — shared record for all phases and agents.
+# Copy to <repo>/.dpdp/assessment.yaml. Validate with scripts/validate_assessment.py.
+# Never put real personal data, secrets or production records in this file.
+schema_version: 1
+
+project:
+  id: my-app                    # stable slug
+  name: My App
+  purpose: "<what the application does and for whom>"
+  assessment_date: 2026-10-29   # drives in_force checks
+  repo_ref: "<git commit or tag assessed>"
+  config_ref: .dpdp/config.yaml
+  assessed_by: [discovery-agent]
+  scope_of_assessment: "<which repos, components, environments were inspected; what was not>"
+  disclaimer: "Engineering assessment, not legal advice. Legal conclusions require qualified review."
+
+# ---------------- Phase A ----------------
+evidence: []
+#  - id: E-001
+#    type: code               # code|config|schema|infra|test-run|doc|interview|legal-opinion|notification
+#    ref: "path/to/file:10-20"
+#    summary: "<what it shows, no personal data>"
+#    trust: verified          # verified|reported|inferred|agent-claim
+#    collected_by: discovery-agent
+#    date: 2026-10-29
+
+inventory:
+  components: []      # {id, type: frontend|backend|db|queue|storage|vendor|ai|job|other, tech, location, evidence: [E-..]}
+  data_subjects: []   # {id, name, may_include_minors: yes|no|unknown, evidence}
+  data_categories: [] # {id, name, examples (field names only), subjects: [], fact_status: confirmed|assumed|unknown, evidence}
+  processing_activities: []
+  #  - id: PA-01
+  #    name: "<activity>"
+  #    purpose: "<specific purpose>"
+  #    data_categories: [DC-01]
+  #    subjects: [DS-01]
+  #    components: [C-01]
+  #    recipients: [V-01]
+  #    processing_location: "<country/region>"
+  #    lawful_ground_candidate: consent   # consent | s.7(a) .. s.7(i) | unknown
+  #    retention: "<current behaviour>"
+  #    fact_status: confirmed             # confirmed | assumed | unknown
+  #    evidence: [E-001]
+  flows: []           # {id, from, to, data_categories, cross_border: yes|no|unknown, processor: V-.., evidence}
+  vendors: []         # {id, name, role: processor|fiduciary|unknown, region, contract_status: in-place|missing|unknown, evidence}
+  flow_diagram: |
+    flowchart LR
+      A[Source] --> B[Component]
+
+assumptions: []       # {id, text, affects: [ids], to_confirm_with: <role>}
+unknowns: []          # {id, text, affects: [ids], owner: <role>}
+
+# ---------------- Phase B ----------------
+applicability:
+  overall:
+    status: undetermined        # applicable|partially-applicable|potentially-applicable|not-currently-applicable|undetermined
+    confidence: low             # high|medium|low
+    reasoning: "<roll-up reasoning naming the activities that drive it>"
+    provisions: []              # e.g. ["Act s.3(a)"]
+    legal_review_required: true
+  activities: []
+  #  - activity: PA-01
+  #    status: applicable
+  #    gates: {personal_data: yes, digital: yes, territorial: yes, exclusion: none, role: fiduciary, exemption: none}
+  #    lawful_ground: "s.7(a)"
+  #    provisions: ["Act s.2(t)", "Act s.3(a)", "Act s.7(a)"]
+  #    facts: [E-001]
+  #    assumptions: []
+  #    reasoning: "<why>"
+  #    confidence: medium
+  #    legal_questions: []
+
+requirements: []
+#  - req_id: DPDP-SEC-02
+#    status: applicable
+#    in_force: no               # yes|no|unknown (computed from catalog commencement vs assessment_date)
+#    commencement: "2027-05-13"
+#    activities: [PA-01]
+#    components: [C-02]
+#    evidence: [E-004]
+#    required_action: "<what must change, or 'none: existing control verified'>"
+#    legal_review: false
+#    rationale: "<trigger met / exception considered>"
+
+legal_questions: []
+#  - id: Q-01
+#    question: "<precise question>"
+#    why: "<which status or requirement depends on it>"
+#    provisions: ["Act s.17(4)"]
+#    related: [PA-01, DPDP-RET-01]   # activity / requirement IDs this question decides
+#    blocking: true
+#    owner: legal_reviewer
+#    status: open               # open|answered
+#    answer: null
+#    answer_source: null        # e.g. "counsel memo 2027-01-10" (a human source, never an agent)
+
+# ---------------- Phase C ----------------
+findings: []
+#  - id: F-01
+#    req_id: DPDP-SEC-02          # null for findings not tied to a requirement
+#    category: legal-gap          # legal-gap|security-vulnerability|operational-weakness|best-practice
+#    mandatory: true              # true only for legal-gap on applicable/partially-applicable requirements
+#    title: "<short>"
+#    description: "<what is wrong, where>"
+#    applicability_status: applicable
+#    severity: high               # critical|high|medium|low
+#    priority: P1                 # P0..P3
+#    technical_impact: "<consequence>"
+#    evidence: [E-004]
+#    status: open                 # open|planned|in-progress|implemented|verified|accepted-risk|wont-fix|superseded
+
+# ---------------- Phase D ----------------
+plan: []
+#  - id: P-01
+#    findings: [F-01]
+#    components: [C-02]
+#    files: ["src/routes/appointments.ts"]
+#    change: "<proposed change>"
+#    dependencies: []
+#    migrations: []
+#    risks: "<security/compat/ops risks>"
+#    tests: ["<test to add or run>"]
+#    acceptance_criteria: ["<observable criterion>"]
+#    approvals_required: []       # legal|security|management|data-owner
+#    approval_status: not-required  # not-required|pending|approved|rejected
+#    approved_by: null            # role + date when approved
+
+# ---------------- Phase E ----------------
+implementation: []
+#  - plan_id: P-01
+#    files_changed: ["src/routes/appointments.ts", "tests/appointments.test.ts"]
+#    commit: "<sha>"
+#    migrations: []
+#    notes: ""
+
+# ---------------- Phase F ----------------
+verification: []
+#  - id: T-01               # T- prefix: IDs are unique across the whole file (V- is used for vendors)
+#    plan_id: P-01
+#    req_ids: [DPDP-SEC-02]
+#    test_ref: "tests/appointments.test.ts::rejects other user's appointments"
+#    command: "npm test -- appointments"
+#    executed: true
+#    result: pass                 # pass|fail|error|not-run
+#    output_ref: ".dpdp/runs/<file>.txt"
+#    executed_by: implementation-agent
+#    independent: false
+#    date: 2026-10-29
+
+# ---------------- Phase G ----------------
+approvals_pending: []      # {item: P-.. or Q-.., needs: legal|security|management|data-owner, reason}
+outstanding_risks: []      # {id, text, related: [ids]}
+next_steps: []             # strings
+reassessment_triggers: []  # strings

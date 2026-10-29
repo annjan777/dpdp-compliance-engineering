@@ -1,0 +1,143 @@
+FF.FFFFF..FFFFF                                                          [100%]
+=================================== FAILURES ===================================
+_____________ test_patient_cannot_read_other_patients_appointments _____________
+
+    def test_patient_cannot_read_other_patients_appointments():
+        db, a, b, _ = _db_with_two_patients_and_clinician()
+>       with pytest.raises(PermissionError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests/test_privacy_controls.py:30: Failed
+_______________________ test_unknown_requester_rejected ________________________
+
+    def test_unknown_requester_rejected():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       with pytest.raises(PermissionError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE PermissionError
+
+tests/test_privacy_controls.py:36: Failed
+__________________ test_registration_log_has_no_contact_data ___________________
+
+caplog = <_pytest.logging.LogCaptureFixture object at 0x7f9bcdc28830>
+
+    def test_registration_log_has_no_contact_data(caplog):
+        db = app.init_db()
+        with caplog.at_level(logging.INFO, logger="clinic"):
+            app.register(db, "Patient Z", "z@example.test", "0000000009", None, None)
+        text = caplog.text
+>       assert "z@example.test" not in text and "0000000009" not in text and "Patient Z" not in text
+E       AssertionError: assert ('z@example.test' not in 'INFO     cl...0000000009\n'
+E         
+E         'z@example.test' is contained here:
+E           Patient Z z@example.test 0000000009
+E         ?           ++++++++++++++)
+
+tests/test_privacy_controls.py:52: AssertionError
+------------------------------ Captured log call -------------------------------
+INFO     clinic:app.py:46 registered user Patient Z z@example.test 0000000009
+_______________________ test_analytics_payload_minimised _______________________
+
+    def test_analytics_payload_minimised():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        payloads = [p for kind, _, p in vendors.OUTBOX if kind == "analytics"]
+>       assert payloads == [{"event": "appointment_booked", "date": "2027-01-10"}]
+E       AssertionError: assert [{'event': 'a...01-10T10:00'}] == [{'event': 'a...'2027-01-10'}]
+E         
+E         At index 0 diff: {'event': 'appointment_booked', 'email': 'a@example.test', 'symptoms': 'fever', 'slot': '2027-01-10T10:00'} != {'event': 'appointment_booked', 'date': '2027-01-10'}
+E         Use -v to get more diff
+
+tests/test_privacy_controls.py:59: AssertionError
+________________ test_marketing_consent_defaults_to_not_granted ________________
+
+    def test_marketing_consent_defaults_to_not_granted():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       assert not app.has_consent(db, a, "PA-02")
+                   ^^^^^^^^^^^^^^^
+E       AttributeError: module 'clinic.app' has no attribute 'has_consent'
+
+tests/test_privacy_controls.py:65: AttributeError
+_________________ test_consent_requires_current_notice_version _________________
+
+    def test_consent_requires_current_notice_version():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        with pytest.raises(ValueError):
+>           app.grant_consent(db, a, "PA-02", "old-notice")
+            ^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'clinic.app' has no attribute 'grant_consent'
+
+tests/test_privacy_controls.py:72: AttributeError
+__________ test_withdrawal_stops_newsletter_and_ledger_keeps_history ___________
+
+    def test_withdrawal_stops_newsletter_and_ledger_keeps_history():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       app.grant_consent(db, a, "PA-02", NV)
+        ^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'clinic.app' has no attribute 'grant_consent'
+
+tests/test_privacy_controls.py:77: AttributeError
+_____________ test_erasure_removes_account_and_notifies_processor ______________
+
+    def test_erasure_removes_account_and_notifies_processor():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.delete_user(db, a)
+        assert db.execute("SELECT COUNT(*) FROM users WHERE id=?", (a,)).fetchone()[0] == 0
+>       assert ("analytics-erasure", vendors.ANALYTICS_URL, {"user_ref": a}) in vendors.OUTBOX
+E       AssertionError: assert ('analytics-erasure', 'https://api.analytics-vendor.example/v1/events', {'user_ref': 1}) in [('analytics', 'https://api.analytics-vendor.example/v1/events', {'event': 'appointment_booked', 'email': 'a@example.test', 'symptoms': 'fever', 'slot': '2027-01-10T10:00'})]
+E        +  where [('analytics', 'https://api.analytics-vendor.example/v1/events', {'event': 'appointment_booked', 'email': 'a@example.test', 'symptoms': 'fever', 'slot': '2027-01-10T10:00'})] = vendors.OUTBOX
+
+tests/test_privacy_controls.py:101: AssertionError
+________ test_erasure_keeps_recent_processing_log_and_purge_removes_old ________
+
+    def test_erasure_keeps_recent_processing_log_and_purge_removes_old():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+        app.delete_user(db, a)
+>       assert db.execute("SELECT COUNT(*) FROM processing_log WHERE user_id=?", (a,)).fetchone()[0] >= 3
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       sqlite3.OperationalError: no such table: processing_log
+
+tests/test_privacy_controls.py:107: OperationalError
+_____________ test_processing_log_holds_no_contact_or_health_data ______________
+
+    def test_processing_log_holds_no_contact_or_health_data():
+        db, a, _, c = _db_with_two_patients_and_clinician()
+        app.get_appointments(db, c, a)
+>       dump = " ".join(str(tuple(r)) for r in db.execute("SELECT * FROM processing_log"))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       sqlite3.OperationalError: no such table: processing_log
+
+tests/test_privacy_controls.py:117: OperationalError
+______________ test_access_summary_lists_purposes_and_recipients _______________
+
+    def test_access_summary_lists_purposes_and_recipients():
+        db, a, _, _ = _db_with_two_patients_and_clinician()
+>       s = app.access_summary(db, a, a)
+            ^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'clinic.app' has no attribute 'access_summary'
+
+tests/test_privacy_controls.py:124: AttributeError
+__________________ test_access_summary_denied_for_other_user ___________________
+
+    def test_access_summary_denied_for_other_user():
+        db, a, b, _ = _db_with_two_patients_and_clinician()
+        with pytest.raises(PermissionError):
+>           app.access_summary(db, b, a)
+            ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'clinic.app' has no attribute 'access_summary'
+
+tests/test_privacy_controls.py:133: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_privacy_controls.py::test_patient_cannot_read_other_patients_appointments
+FAILED tests/test_privacy_controls.py::test_unknown_requester_rejected - Fail...
+FAILED tests/test_privacy_controls.py::test_registration_log_has_no_contact_data
+FAILED tests/test_privacy_controls.py::test_analytics_payload_minimised - Ass...
+FAILED tests/test_privacy_controls.py::test_marketing_consent_defaults_to_not_granted
+FAILED tests/test_privacy_controls.py::test_consent_requires_current_notice_version
+FAILED tests/test_privacy_controls.py::test_withdrawal_stops_newsletter_and_ledger_keeps_history
+FAILED tests/test_privacy_controls.py::test_erasure_removes_account_and_notifies_processor
+FAILED tests/test_privacy_controls.py::test_erasure_keeps_recent_processing_log_and_purge_removes_old
+FAILED tests/test_privacy_controls.py::test_processing_log_holds_no_contact_or_health_data
+FAILED tests/test_privacy_controls.py::test_access_summary_lists_purposes_and_recipients
+FAILED tests/test_privacy_controls.py::test_access_summary_denied_for_other_user
+12 failed, 3 passed in 0.10s

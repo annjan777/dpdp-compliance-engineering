@@ -1,0 +1,1135 @@
+{
+  "tool": "dpdp scan_personal_data",
+  "root": ".",
+  "files_scanned": 9,
+  "note": "Signals are leads, not facts. Confirm each by reading the code before recording evidence. 'weak' = hit in tests/docs/fixtures.",
+  "counts": {
+    "children.minor_signals": 2,
+    "cross_border.region": 1,
+    "existing_controls.access_control": 16,
+    "existing_controls.consent": 53,
+    "existing_controls.erasure_retention": 27,
+    "existing_controls.notice_policy": 7,
+    "personal_field.contact": 27,
+    "personal_field.demographic": 4,
+    "personal_field.health": 37,
+    "personal_field.identity": 4,
+    "personal_field.location": 3,
+    "third_party.analytics": 11,
+    "third_party.outbound_http": 2
+  },
+  "signals": {
+    "children.minor_signals": [
+      {
+        "file": "README.md",
+        "line": 3,
+        "match": "Students",
+        "weak": true
+      },
+      {
+        "file": "tests/test_app.py",
+        "line": 10,
+        "match": "Student",
+        "weak": true
+      }
+    ],
+    "cross_border.region": [
+      {
+        "file": "clinic/vendors.py",
+        "line": 4,
+        "match": "us-east-1",
+        "weak": false
+      }
+    ],
+    "existing_controls.access_control": [
+      {
+        "file": "clinic/register.py",
+        "line": 8,
+        "match": "role",
+        "weak": false
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 9,
+        "match": "role",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 31,
+        "match": "role",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 108,
+        "match": "_authorise",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 111,
+        "match": "role",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 112,
+        "match": "role",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 113,
+        "match": "PermissionError",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 125,
+        "match": "_authorise",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 148,
+        "match": "PermissionError",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 159,
+        "match": "PermissionError",
+        "weak": false
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 21,
+        "match": "role",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 27,
+        "match": "authorisation",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 30,
+        "match": "PermissionError",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 36,
+        "match": "PermissionError",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 109,
+        "match": "PermissionError",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 171,
+        "match": "PermissionError",
+        "weak": true
+      }
+    ],
+    "existing_controls.consent": [
+      {
+        "file": "clinic/register.py",
+        "line": 5,
+        "match": "consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/notices.py",
+        "line": 8,
+        "match": "withdraw",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 39,
+        "match": "consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 40,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 45,
+        "match": "withdrawn",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 66,
+        "match": "marketing_opt_in",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 67,
+        "match": "marketing_opt_in",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 75,
+        "match": "marketing_opt_in",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 76,
+        "match": "grant_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 84,
+        "match": "consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 87,
+        "match": "grant_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 89,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 94,
+        "match": "withdraw_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 95,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 97,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 98,
+        "match": "withdrawn",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 102,
+        "match": "has_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 103,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 134,
+        "match": "has_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 140,
+        "match": "_ever_consented",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 141,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 151,
+        "match": "has_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 152,
+        "match": "_ever_consented",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 163,
+        "match": "_ever_consented",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 165,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 166,
+        "match": "has_consent",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 167,
+        "match": "consents",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 168,
+        "match": "withdrawn",
+        "weak": false
+      },
+      {
+        "file": "tests/test_app.py",
+        "line": 18,
+        "match": "marketing_opt_in",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 63,
+        "match": "test_marketing_consent_defaults_to_not_granted",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 65,
+        "match": "has_consent",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 69,
+        "match": "test_consent_requires_current_notice_version",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 72,
+        "match": "grant_consent",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 75,
+        "match": "test_withdrawal_stops_newsletter_and_ledger_keeps_history",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 77,
+        "match": "grant_consent",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 79,
+        "match": "withdraw_consent",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 82,
+        "match": "consents",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 83,
+        "match": "withdrawn",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 86,
+        "match": "test_core_service_works_without_optional_consent",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 93,
+        "match": "withdraw",
+        "weak": true
+      }
+    ],
+    "existing_controls.erasure_retention": [
+      {
+        "file": "clinic/vendors.py",
+        "line": 11,
+        "match": "request_email_erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 12,
+        "match": "erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 10,
+        "match": "erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 11,
+        "match": "RETAIN_APPOINTMENTS_ON_ERASURE",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 12,
+        "match": "PROCESSING_LOG_RETENTION_DAYS",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 25,
+        "match": "erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 159,
+        "match": "erase",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 164,
+        "match": "erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 171,
+        "match": "RETAIN_APPOINTMENTS_ON_ERASURE",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 174,
+        "match": "erase_account",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 179,
+        "match": "erase",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 182,
+        "match": "request_email_erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 185,
+        "match": "purge_processing_log",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 186,
+        "match": "retention_days",
+        "weak": false
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 96,
+        "match": "erasure",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 97,
+        "match": "test_erasure_removes_account_and_notifies_email_processor",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 102,
+        "match": "erasure",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 103,
+        "match": "erasure",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 106,
+        "match": "test_only_account_holder_can_erase",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 113,
+        "match": "test_erased_ids_are_not_reused_and_nothing_carries_over",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 114,
+        "match": "erased",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 136,
+        "match": "test_erasure_keeps_recent_processing_log_and_purge_removes_o",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 140,
+        "match": "purge_processing_log",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 142,
+        "match": "purge_processing_log",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 175,
+        "match": "test_erasure_does_not_send_non_subscriber_email_to_provider",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 179,
+        "match": "erasure",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 182,
+        "match": "test_failed_erasure_changes_nothing",
+        "weak": true
+      }
+    ],
+    "existing_controls.notice_policy": [
+      {
+        "file": "README.md",
+        "line": 5,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 1,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 27,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 55,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 62,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 96,
+        "match": "DPDP",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 153,
+        "match": "DPDP",
+        "weak": true
+      }
+    ],
+    "personal_field.contact": [
+      {
+        "file": "clinic/register.py",
+        "line": 4,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 5,
+        "match": "emails",
+        "weak": false
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 9,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/notices.py",
+        "line": 6,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 11,
+        "match": "request_email_erasure",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 12,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 15,
+        "match": "send_email",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 16,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 27,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 28,
+        "match": "phone",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 66,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 70,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 71,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 133,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 135,
+        "match": "send_email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 152,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 160,
+        "match": "email",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 163,
+        "match": "email_shared",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 181,
+        "match": "email_shared",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 182,
+        "match": "request_email_erasure",
+        "weak": false
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 97,
+        "match": "test_erasure_removes_account_and_notifies_email_processor",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 102,
+        "match": "email",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 159,
+        "match": "email",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 162,
+        "match": "test_access_summary_lists_email_provider_once_consented",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 165,
+        "match": "email",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 175,
+        "match": "test_erasure_does_not_send_non_subscriber_email_to_provider",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 179,
+        "match": "email",
+        "weak": true
+      }
+    ],
+    "personal_field.demographic": [
+      {
+        "file": "clinic/app.py",
+        "line": 29,
+        "match": "dob",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 66,
+        "match": "dob",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 70,
+        "match": "dob",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 71,
+        "match": "dob",
+        "weak": false
+      }
+    ],
+    "personal_field.health": [
+      {
+        "file": "README.md",
+        "line": 3,
+        "match": "health",
+        "weak": true
+      },
+      {
+        "file": "README.md",
+        "line": 4,
+        "match": "symptoms",
+        "weak": true
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 4,
+        "match": "symptoms",
+        "weak": false
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 5,
+        "match": "Health",
+        "weak": false
+      },
+      {
+        "file": "clinic/notices.py",
+        "line": 7,
+        "match": "health",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 10,
+        "match": "medical",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 31,
+        "match": "patient",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 37,
+        "match": "symptoms",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 116,
+        "match": "symptoms",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 117,
+        "match": "symptoms",
+        "weak": false
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 16,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 18,
+        "match": "Patient",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 19,
+        "match": "Patient",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 28,
+        "match": "test_patient_cannot_read_other_patients_appointments",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 29,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 35,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 41,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 50,
+        "match": "Patient",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 52,
+        "match": "Patient",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 55,
+        "match": "health",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 57,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 64,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 70,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 76,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 87,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 98,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 107,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 115,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 118,
+        "match": "Patient",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 137,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 146,
+        "match": "test_processing_log_holds_no_contact_or_health_data",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 147,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 155,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 163,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 169,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 177,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 184,
+        "match": "_db_with_two_patients_and_clinician",
+        "weak": true
+      }
+    ],
+    "personal_field.identity": [
+      {
+        "file": "clinic/app.py",
+        "line": 30,
+        "match": "roll_no",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 66,
+        "match": "roll_no",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 70,
+        "match": "roll_no",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 71,
+        "match": "roll_no",
+        "weak": false
+      }
+    ],
+    "personal_field.location": [
+      {
+        "file": "clinic/register.py",
+        "line": 9,
+        "match": "address",
+        "weak": false
+      },
+      {
+        "file": "clinic/notices.py",
+        "line": 6,
+        "match": "address",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 163,
+        "match": "addresses",
+        "weak": false
+      }
+    ],
+    "third_party.analytics": [
+      {
+        "file": "README.md",
+        "line": 4,
+        "match": "analytics",
+        "weak": true
+      },
+      {
+        "file": "clinic/register.py",
+        "line": 8,
+        "match": "analytics",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 4,
+        "match": "ANALYTICS_URL",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 8,
+        "match": "analytics",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 152,
+        "match": "analytics",
+        "weak": false
+      },
+      {
+        "file": "clinic/app.py",
+        "line": 179,
+        "match": "Analytics",
+        "weak": false
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 55,
+        "match": "analytics",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 58,
+        "match": "analytics",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 103,
+        "match": "analytics",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 159,
+        "match": "analytics",
+        "weak": true
+      },
+      {
+        "file": "tests/test_privacy_controls.py",
+        "line": 165,
+        "match": "analytics",
+        "weak": true
+      }
+    ],
+    "third_party.outbound_http": [
+      {
+        "file": "clinic/notices.py",
+        "line": 10,
+        "match": "https://www.dpb.gov.in",
+        "weak": false
+      },
+      {
+        "file": "clinic/vendors.py",
+        "line": 4,
+        "match": "https://api.analytics-vendor.example",
+        "weak": false
+      }
+    ]
+  }
+}
