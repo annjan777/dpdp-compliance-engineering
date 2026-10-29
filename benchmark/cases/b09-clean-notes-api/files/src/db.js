@@ -1,4 +1,4 @@
-let nextId = 1; // ids are never reused
+let nextId = 1;
 const users = new Map(), notes = new Map(), sessions = new Map(), consents = [], processingLog = [];
 
 function createUser(email, passwordHash) {

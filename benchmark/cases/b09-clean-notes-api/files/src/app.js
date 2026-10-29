@@ -28,7 +28,7 @@ app.get("/notes/:id", requireAuth, (req, res) => {
 });
 
 app.delete("/account", requireAuth, (req, res) => {
-  db.eraseUser(req.userId); // deletes notes, sessions; closes consents; keeps id-only processing log
+  db.eraseUser(req.userId);
   log.info("erase", { userId: req.userId });
   res.status(204).end();
 });

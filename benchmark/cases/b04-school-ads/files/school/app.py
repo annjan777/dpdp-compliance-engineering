@@ -15,6 +15,6 @@ def mark_absent(pupil_id, day):
 
 def learning_page_viewed(pupil_id, topic, seconds):
     pupil = db.execute("SELECT id, class, dob FROM pupils WHERE id=?", (pupil_id,)).fetchone()
-    # sponsors pay per targeted impression
+    # learning page view
     adnet.track({"pupil": pupil[0], "class": pupil[1], "dob": pupil[2], "topic": topic, "dwell": seconds})
     return adnet.pick_ad(interests=[topic], age_from_dob=pupil[2])

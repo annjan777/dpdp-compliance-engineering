@@ -23,6 +23,7 @@ STATUSES = {"applicable", "partially-applicable", "potentially-applicable", "not
 SEV = {"low": 1, "medium": 2, "high": 3, "critical": 4}
 CATEGORIES = {"legal-gap", "security-vulnerability", "operational-weakness", "best-practice"}
 LINE_TOLERANCE = 2
+SCORER_VERSION = "0.1"  # 0.1: evidence check uses LINE_TOLERANCE past EOF (pilot showed off-by-one ranges)
 WEIGHTS = {"recall": 0.5, "status": 0.2, "precision": 0.15, "evidence": 0.15}
 
 
@@ -122,7 +123,7 @@ def _file_lengths(app_dir):
 
 
 def score(sub, truth, app_dir):
-    res = {"case": truth["case"], "malformed": [], "integrity": {}, "components": {}, "matched": {}, "false_positives": [],
+    res = {"scorer_version": SCORER_VERSION, "case": truth["case"], "malformed": [], "integrity": {}, "components": {}, "matched": {}, "false_positives": [],
            "human_review": {}, "notes": []}
     errs = validate_submission(sub)
     if errs:
@@ -181,7 +182,7 @@ def score(sub, truth, app_dir):
     for f in findings:
         rng = _lines(f)
         path = next((p for p in lengths if _same_file(f["file"], p)), None)
-        if path and 1 <= rng[0] <= rng[1] <= lengths[path]:
+        if path and 1 <= rng[0] <= rng[1] <= lengths[path] + LINE_TOLERANCE:  # v0.1: same tolerance as matching
             valid += 1
         else:
             res["notes"].append(f"unsupported evidence location: {f['file']}:{rng}")

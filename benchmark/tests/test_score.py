@@ -190,3 +190,11 @@ def test_validate_submission_accepts_lines_range():
     assert validate_submission({"overall_status": "applicable",
                                 "findings": [{"file": "a", "lines": [1, 3], "severity": "low", "category": "best-practice",
                                               "mandatory": False}]}) == []
+
+
+def test_evidence_tolerates_off_by_one_past_eof_but_not_invented_lines():
+    t = truth("b02-local-ledger")
+    ok = {"overall_status": "not-currently-applicable", "findings": [{**f("ledger/core.py", 0, "low", "best-practice"), "lines": [26, 31]}]}
+    bad = {"overall_status": "not-currently-applicable", "findings": [{**f("ledger/core.py", 0, "low", "best-practice"), "lines": [26, 40]}]}
+    assert score(ok, t, app("b02-local-ledger"))["components"]["evidence"] == 1.0
+    assert score(bad, t, app("b02-local-ledger"))["components"]["evidence"] == 0.0

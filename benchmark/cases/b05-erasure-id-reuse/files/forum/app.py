@@ -25,7 +25,7 @@ def my_posts(db, member_id):
 
 
 def delete_account(db, member_id):
-    # posts and digest preference are kept so threads stay readable
+    # remove the member
     db.execute("DELETE FROM members WHERE id=?", (member_id,))
     db.commit()
 
