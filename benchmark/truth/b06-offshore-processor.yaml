@@ -1,0 +1,21 @@
+case: b06-offshore-processor
+trap: "Indian company processing only US residents' data under a foreign contract (Act s.17(1)(d)); security still matters."
+status:
+  accept: [partially-applicable, not-currently-applicable, potentially-applicable]
+  partial: {}
+  human_review: true
+  rationale: "s.17(1)(d) removes most duties but keeps s.8(5) for a fiduciary; whether the Indian company is a fiduciary or processor is a legal question. Status not auto-scored; 'applicable' with full duties would be wrong."
+must_find:
+  - id: T1
+    title: "SSNs and names written to logs in plaintext"
+    severity_min: high
+    locations: [{file: etl/load_members.py, lines: [15, 15]}]
+    verified_by: "read"
+  - id: T2
+    title: "SSN and diagnosis codes stored unprotected"
+    severity_min: medium
+    locations: [{file: etl/load_members.py, lines: [10, 14]}]
+    verified_by: "read"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: ["US laws (e.g. HIPAA) may apply; outside this benchmark's DPDP scope and not scored."]

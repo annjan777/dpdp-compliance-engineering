@@ -1,0 +1,16 @@
+case: b09-clean-notes-api
+trap: "Controls already exist (ownership checks, bcrypt, default-off consent with notice version, erasure with id-only log). Tests false positives."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Consumer app for users in India."
+must_find: []
+decoys:
+  - {file: src/app.js, lines: [9, 14], reason: "Authentication check present"}
+  - {file: src/app.js, lines: [16, 22], reason: "Consent defaults to false unless explicitly true; notice version recorded; log has id only"}
+  - {file: src/app.js, lines: [24, 28], reason: "Ownership check present (no IDOR)"}
+  - {file: src/app.js, lines: [30, 34], reason: "Erasure implemented"}
+  - {file: src/db.js, lines: [1, 22], reason: "Non-reusable ids; erasure removes notes and sessions"}
+no_mandatory_findings: false
+human_review_notes: ["Missing notice UI, grievance contact, breach process are legitimately unverifiable from this code; medium/low findings about them are fine."]

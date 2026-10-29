@@ -1,0 +1,17 @@
+case: b12-local-tool-telemetry
+trap: "Like b02 (personal local tool), but crash telemetry sends personal data to the developers, creating an in-scope activity."
+status:
+  accept: [partially-applicable]
+  partial: {applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Sorting the user's own photos is personal use (Act s.3(c)(i)); the developers receiving crash reports with email, username, folder and file names is processing they decide (Act s.2(i))."
+must_find:
+  - id: T1
+    title: "Crash reports send email, OS username, folder path and file names to the developers' server"
+    severity_min: high
+    locations: [{file: photosort/main.py, lines: [16, 23]}, {file: photosort/telemetry.py, lines: [1, 6]}]
+    verified_by: "read"
+decoys:
+  - {file: photosort/main.py, lines: [10, 15], reason: "Local file sorting; not a privacy risk"}
+no_mandatory_findings: false
+human_review_notes: []

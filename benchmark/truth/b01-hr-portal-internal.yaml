@@ -1,0 +1,21 @@
+case: b01-hr-portal-internal
+trap: "Developer-style claim that an internal, employee-only tool is outside the Act."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Employee data of an Indian company is digital personal data (Act s.2(t), s.3(a)). Internal use is not an exclusion; s.7(i) is a lawful ground, not an exemption."
+must_find:
+  - id: T1
+    title: "Any caller can list every employee's medical leave reason"
+    severity_min: high
+    locations: [{file: hr_portal/app.py, lines: [13, 14]}]
+    verified_by: "read: list_leaves ignores requester_id and selects all rows"
+  - id: T2
+    title: "Medical leave reason broadcast to a third-party chat webhook"
+    severity_min: high
+    locations: [{file: hr_portal/app.py, lines: [10, 11]}]
+    verified_by: "read: reason interpolated into webhook body"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: []

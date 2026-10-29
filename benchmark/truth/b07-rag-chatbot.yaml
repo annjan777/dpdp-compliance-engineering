@@ -1,0 +1,21 @@
+case: b07-rag-chatbot
+trap: "AI system: erasure must reach chat history and vector store; PII sent to a model provider."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Consumer lending app for borrowers in India."
+must_find:
+  - id: T1
+    title: "Account deletion leaves chat history and uploaded document vectors (no owner metadata to delete by)"
+    severity_min: high
+    locations: [{file: bot/service.py, lines: [20, 21]}, {file: bot/store.py, lines: [9, 10]}, {file: bot/service.py, lines: [16, 17]}]
+    verified_by: "read: delete_account pops users only; vectors stored without owner"
+  - id: T2
+    title: "PAN, phone and income sent to an overseas model provider in every prompt"
+    severity_min: medium
+    locations: [{file: bot/service.py, lines: [7, 11]}, {file: bot/llm.py, lines: [1, 4]}]
+    verified_by: "read"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: []

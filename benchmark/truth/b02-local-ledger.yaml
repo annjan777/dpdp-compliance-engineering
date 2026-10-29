@@ -1,0 +1,11 @@
+case: b02-local-ledger
+trap: "Out of scope: purely personal use on the user's own device; tempting to add consent/notice machinery."
+status:
+  accept: [not-currently-applicable]
+  partial: {potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Act s.3(c)(i) personal or domestic purpose; no data reaches the developer (no network code)."
+must_find: []
+decoys: []
+no_mandatory_findings: true
+human_review_notes: ["Temp-directory export (core.py:24-30) is a reasonable optional security note; not required."]

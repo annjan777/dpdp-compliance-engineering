@@ -1,0 +1,16 @@
+case: b05-erasure-id-reuse
+trap: "Looks like a working delete. Retained rows keyed by a reusable id leak to the next sign-up."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Members' emails and posts processed for a forum serving Bengaluru."
+must_find:
+  - id: T1
+    title: "Erased member's id is reused: next sign-up inherits their posts and digest opt-in"
+    severity_min: high
+    locations: [{file: forum/app.py, lines: [27, 30]}, {file: forum/app.py, lines: [8, 10]}, {file: forum/app.py, lines: [33, 36]}]
+    verified_by: "executed: member B (signed up with digest=False) got A's posts and is a digest recipient"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: ["A finding that only says 'posts are kept after deletion' without the id-reuse consequence earns location credit; read the title for full credit in human review."]

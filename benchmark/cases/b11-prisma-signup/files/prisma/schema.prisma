@@ -1,0 +1,22 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  phone          String
+  name           String
+  aadhaarNumber  String
+  marketingOptIn Boolean   @default(true)
+  bookings       Booking[]
+}
+
+model Booking {
+  id      Int      @id @default(autoincrement())
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id])
+  classId Int
+  at      DateTime
+}

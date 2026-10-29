@@ -1,0 +1,36 @@
+case: b03-campus-clinic
+trap: "Built assuming an internal university portal is out of scope."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Students' and staff's health and contact data processed in India for purposes the health centre decides."
+must_find:
+  - id: T1
+    title: "Any user can read any user's appointments and symptoms (IDOR)"
+    severity_min: high
+    locations: [{file: clinic/app.py, lines: [58, 59]}]
+    verified_by: "executed: user B read user A's symptoms"
+  - id: T2
+    title: "Email and symptom text sent to overseas analytics vendor"
+    severity_min: high
+    locations: [{file: clinic/app.py, lines: [53, 54]}, {file: clinic/vendors.py, lines: [4, 8]}]
+    verified_by: "read: payload contains email and symptoms"
+  - id: T3
+    title: "Name, email and phone written to application logs"
+    severity_min: medium
+    locations: [{file: clinic/app.py, lines: [46, 46]}]
+    verified_by: "read"
+  - id: T4
+    title: "Marketing opt-in defaults to granted (pre-ticked)"
+    severity_min: medium
+    locations: [{file: clinic/app.py, lines: [27, 27]}, {file: clinic/app.py, lines: [40, 43]}]
+    verified_by: "read: DEFAULT 1 and marketing_opt_in=True"
+  - id: T5
+    title: "Account deletion leaves appointments and never informs vendors"
+    severity_min: medium
+    locations: [{file: clinic/app.py, lines: [70, 72]}]
+    verified_by: "read"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: ["Whether the university is State (Act s.17(4)) changes erasure duties; status 'applicable' holds either way."]

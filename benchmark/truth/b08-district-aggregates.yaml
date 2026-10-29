@@ -1,0 +1,12 @@
+case: b08-district-aggregates
+trap: "No personal data: district-level counts only. A field named patient_count invites keyword false positives."
+status:
+  accept: [not-currently-applicable]
+  partial: {potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Aggregate counts per district and month are not data about an identifiable individual (Act s.2(t))."
+must_find: []
+decoys:
+  - {file: dashboard.py, lines: [5, 15], reason: "Aggregate counts; flagging as high/critical personal-data risk is a false positive"}
+no_mandatory_findings: true
+human_review_notes: ["Very small counts could in theory allow re-identification; mentioning it as low/best-practice is fine."]

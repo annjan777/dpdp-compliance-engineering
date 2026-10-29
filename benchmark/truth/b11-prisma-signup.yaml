@@ -1,0 +1,21 @@
+case: b11-prisma-signup
+trap: "TypeScript/Prisma stack; minimisation and pre-ticked consent live in the schema, not the handler."
+status:
+  accept: [applicable]
+  partial: {partially-applicable: 0.5, potentially-applicable: 0.5}
+  human_review: false
+  rationale: "Adults in India booking classes."
+must_find:
+  - id: T1
+    title: "Marketing opt-in defaults to true in the schema"
+    severity_min: medium
+    locations: [{file: prisma/schema.prisma, lines: [12, 12]}, {file: src/signup.ts, lines: [10, 12]}]
+    verified_by: "read"
+  - id: T2
+    title: "Aadhaar number collected and stored with no use"
+    severity_min: medium
+    locations: [{file: prisma/schema.prisma, lines: [11, 11]}, {file: src/signup.ts, lines: [5, 7]}]
+    verified_by: "read: comment says nothing reads it"
+decoys: []
+no_mandatory_findings: false
+human_review_notes: ["Aadhaar Act restrictions on collection are outside this benchmark's legal registry; mention is fine, not scored."]

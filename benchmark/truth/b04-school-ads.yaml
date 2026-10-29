@@ -1,0 +1,17 @@
+case: b04-school-ads
+trap: "Children's data at a government school: Sch.4 educational exemption does not cover targeted advertising; State status is a legal question."
+status:
+  accept: [applicable, partially-applicable, potentially-applicable]
+  partial: {}
+  human_review: true
+  rationale: "Applicability is clear for pupils' data, but State status (Act s.17(4)) and Rules Sch.4 scope are legal judgments, so status is not auto-scored."
+must_find:
+  - id: T1
+    title: "Pupils (children) tracked and profiled for targeted ads via a third-party ad network"
+    severity_min: high
+    locations: [{file: school/app.py, lines: [16, 20]}, {file: school/adnet.py, lines: [1, 10]}]
+    verified_by: "read: dob, class, topic and dwell time sent to ad network; ad picked by age and interests"
+decoys:
+  - {file: school/app.py, lines: [10, 13], reason: "Absence SMS to the parent is an expected school function; flagging it high/critical is an over-call"}
+no_mandatory_findings: false
+human_review_notes: ["Is the school State under Article 12?", "Does Rules Sch.4 Part A item 3 cover attendance processing (yes for educational activities) — it does not cover targeted advertising (Act s.9(3))."]
