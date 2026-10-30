@@ -1,0 +1,25 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml pytest
+      - name: Guard-rail and scorer tests
+        run: python -m pytest -q scripts/tests benchmark/tests
+      - name: Worked examples validate (strict)
+        run: |
+          python scripts/validate_assessment.py examples/pocket-ledger/.dpdp/assessment.yaml --strict
+          python scripts/validate_assessment.py examples/campus-clinic/.dpdp/assessment.yaml --strict
+      - name: Worked examples' own tests
+        run: |
+          (cd examples/campus-clinic && python -m pytest -q)
+          (cd examples/pocket-ledger && python -m pytest -q)

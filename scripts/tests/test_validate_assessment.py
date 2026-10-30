@@ -137,8 +137,8 @@ def test_compliance_guarantees_rejected(ins, claim):
     assert any("compliance guarantee" in e for e in errors(ins))
 
 
-@pytest.mark.parametrize("leak", ["contact priya.sharma@gmail.com", "call 9876543210", "aadhaar 2345 6789 0123",
-                                  "key sk-abcdefghijklmnopqrstuvwxyz123456"])
+@pytest.mark.parametrize("leak", ["contact jane.roe@mailcorp.co", "call 9876543210", "aadhaar 2345 6789 0123",
+                                  "key " + "sk-" + "x" * 30])  # key built at runtime so secret scanners ignore it
 def test_personal_data_and_secrets_rejected(ins, leak):
     ins["evidence"][0]["summary"] = leak
     assert any("never put personal data" in e for e in errors(ins))

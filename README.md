@@ -1,16 +1,61 @@
-# dpdp-compliance-engineering
+# DPDP Act compliance engineering skill for AI coding agents
 
-A portable agent skill that turns India's DPDP Act, 2023 and DPDP Rules, 2025 into evidence-backed engineering work on any codebase:
+**An open-source Claude Code / agent skill for India's Digital Personal Data Protection (DPDP) Act, 2023 and DPDP Rules, 2025. It checks whether the Act applies to your code, finds privacy gaps, implements fixes, and verifies them with tests.**
 
-- discover personal data;
-- assess applicability per processing activity;
-- record a gap register;
-- plan with approval gates;
-- implement in the project's own stack;
-- verify with executed tests;
-- report with a traceability matrix.
+[![CI](https://github.com/annjan777/dpdp-compliance-engineering/actions/workflows/ci.yml/badge.svg)](https://github.com/annjan777/dpdp-compliance-engineering/actions/workflows/ci.yml) · [Apache-2.0](LICENSE) · [Results](benchmark/RESULTS.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
-It is an engineering aid, not legal advice, and it never certifies compliance.
+> **Not legal advice.** This is an engineering aid. It never certifies compliance, and legal conclusions need review by a qualified lawyer.
+
+### The problem
+
+Teams building for Indian users have until **13 May 2027** before most DPDP duties take effect. The duties cover consent, notice, erasure, breach reporting and children's data. An AI coding agent asked to "make this DPDP compliant" usually starts adding consent banners. It skips the first question: does the Act even apply to what this code does?
+
+### What it does
+
+```text
+You: Does DPDP apply to this repo? Assess it and fix what's needed.
+
+Agent (with this skill):
+  Applicability: applicable (medium confidence). "Internal portal" is not an exemption.
+                 Duties apply from 2027-05-13 (not yet in force).
+  Gaps:  F-01 critical  get_appointments() lets any user read any patient's symptoms  clinic/app.py:58
+         F-03 high      email + symptom text sent to an overseas analytics vendor      clinic/app.py:54
+         ... 9 more, mandatory obligations kept separate from best practice
+  Legal questions for a lawyer: 9 (e.g. is a public university "State" under Act s.17(4)?)
+  Implemented: 8 changes. Tests: 23 passed. Independent review found 11 more issues, all fixed or filed.
+```
+
+This is condensed from the real worked example in [`examples/campus-clinic`](examples/campus-clinic). The [`pocket-ledger`](examples/pocket-ledger) example shows the opposite result: an app the Act does **not** apply to, where the skill adds no compliance machinery.
+
+### Quick start
+
+```bash
+git clone https://github.com/annjan777/dpdp-compliance-engineering ~/.claude/skills/dpdp-compliance-engineering
+```
+
+Then, in Claude Code inside your project, ask: *"Does DPDP apply to this repo? Assess it."* Other install options are under [Install](#install).
+
+### How it differs
+
+- **Applicability before obligations.** It assesses each processing activity, with five possible statuses. "Not applicable" is a valid, evidence-backed answer.
+- **Citation discipline.** A validator rejects provisions that don't exist, test passes that never ran, and phrases like "fully compliant".
+- **Measured, including where it falls short.** See [benchmark/RESULTS.md](benchmark/RESULTS.md): it helps with handling legal uncertainty, and showed no detection benefit on an easy benchmark.
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[Discover<br/>code, schema, vendors, AI] --> B[Applicability<br/>per activity, 5 statuses]
+  B --> C[Gaps<br/>mandatory vs best practice]
+  C --> D[Plan<br/>approval gates]
+  D --> E[Implement<br/>project's own stack]
+  E --> F[Verify<br/>executed tests + independent reviewer]
+  F --> G[Report<br/>traceability matrix]
+  V{{validate_assessment.py<br/>citations, test truth, no guarantees}} -.checks.-> B & C & F & G
+  B -.legal questions.-> H([Human / lawyer])
+```
+
+Every phase writes to one shared record, `.dpdp/assessment.yaml`, so several agents can split the work without losing evidence. A validator checks the record after each phase.
 
 ## What's inside
 
@@ -48,13 +93,13 @@ See `benchmark/RESULTS.md`. In short, on `claude-opus-5-5`:
 
 ## Install
 
-**Claude Code (one user, all repos):** copy the folder to `~/.claude/skills/dpdp-compliance-engineering/`.
+**Claude Code (one user, all repos):** clone or copy the folder to `~/.claude/skills/dpdp-compliance-engineering/`.
 
 **Claude Code (one repo, shared with the team):** commit it to `<repo>/.claude/skills/dpdp-compliance-engineering/`.
 
 **Subagents (optional):** copy `assets/agents/*.md` to `~/.claude/agents/` or `<repo>/.claude/agents/`. You get `dpdp-discovery`, `dpdp-legal-mapping`, `dpdp-privacy-engineer`, `dpdp-implementer` and `dpdp-verifier`.
 
-**claude.ai / Claude apps:** upload `dpdp-compliance-engineering.skill` under Settings → Capabilities → Skills.
+**claude.ai / Claude apps:** download `dpdp-compliance-engineering.skill` from the [latest release](https://github.com/annjan777/dpdp-compliance-engineering/releases/latest) and upload it under Settings → Capabilities → Skills.
 
 **Other agent platforms:** the skill is plain Markdown, YAML and Python 3. Point the agent at `SKILL.md` as its instructions. The scripts need only Python 3.9+ and PyYAML (`pip install pyyaml`).
 
