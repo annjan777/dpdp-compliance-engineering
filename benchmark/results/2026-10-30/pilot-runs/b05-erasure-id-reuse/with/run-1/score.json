@@ -1,0 +1,22 @@
+{
+  "scorer_version": "0.1",
+  "case": "b05-erasure-id-reuse",
+  "malformed": [],
+  "integrity": {
+    "invalid_citations": [],
+    "compliance_claims": []
+  },
+  "components": {
+    "recall": 1.0,
+    "status": 1.0,
+    "precision": 1.0,
+    "evidence": 1.0
+  },
+  "matched": {
+    "T1": 1.0
+  },
+  "false_positives": [],
+  "human_review": {},
+  "notes": [],
+  "score": 1.0
+}

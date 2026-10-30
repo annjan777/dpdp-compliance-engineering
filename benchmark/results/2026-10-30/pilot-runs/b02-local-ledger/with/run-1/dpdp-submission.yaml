@@ -1,0 +1,28 @@
+overall_status: not-currently-applicable
+citations: ["Act s.3(c)(i)", "Act s.2(t)", "Act s.3(a)", "Act s.2(i)"]
+findings:
+  - title: "CSV export of all expenses defaults to a predictable, fixed filename in the shared system temp directory (other local users may read it; symlink/pre-creation risk; never cleaned up)"
+    file: ledger/core.py
+    lines: [26, 31]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: []
+  - title: "Ledger database (amounts and free-text notes) created in home directory with default umask permissions and no encryption; may be readable by other users on shared machines"
+    file: ledger/core.py
+    lines: [6, 12]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "No way to delete or correct individual entries; free-text notes may hold third-party personal details the user cannot remove short of deleting the whole DB file"
+    file: ledger/core.py
+    lines: [10, 18]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+legal_questions:
+  - "If the author later adds telemetry, crash reporting, cloud sync, accounts or support uploads so that user data reaches the developer, does the developer become a Data Fiduciary for that new activity (Act s.2(i), s.3(a)), requiring a fresh applicability assessment?"
+  - "If an organisation (e.g. an employer or business) deploys the tool to record expenses about other identifiable people, does the s.3(c)(i) personal/domestic exclusion stop applying to that deployer?"
+summary: "Pocket Ledger is a local-only CLI with no network, accounts or telemetry (verified in ledger/core.py: only csv, os, sqlite3, tempfile); each individual processes their own expense data for personal purposes, which falls within the Act s.3(c)(i) exclusion, and the developer receives no personal data and so is not a Data Fiduciary. The Act is therefore not currently applicable on the verified code, though the conclusion rests on the code rather than the author's assumption and must be revisited if any data flow to the developer or an organisational deployment is added. The main code issue is a security weakness: the full expense export defaults to a predictable file in the shared temp directory; the other items are optional hardening (file permissions, entry deletion)."

@@ -1,0 +1,81 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.4", "Act s.7(i)", "Act s.8(5)", "G.S.R. 843(E)"]
+findings:
+  - title: "list_leaves ignores requester_id and returns every employee's name and medical leave reason to any caller (no access control)"
+    file: hr_portal/app.py
+    lines: [13, 14]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.2(u)", "Act Sch. item 1"]
+  - title: "Employee name and free-text medical leave reason are broadcast to a Slack channel via webhook (unnecessary disclosure of health details to a third party / wider audience)"
+    file: hr_portal/app.py
+    lines: [10, 11]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.7(i)", "Act s.8(5)", "Act s.6(1)"]
+  - title: "Slack receives personal data as a vendor with no evidence of a processor contract or security clauses"
+    file: hr_portal/app.py
+    lines: [5, 11]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(1)", "Act s.8(2)", "Rules r.6(1)(f)", "Act s.16"]
+  - title: "apply_leave has no authentication or authorisation; any caller can overwrite any employee's medical_leave_reason by emp_id"
+    file: hr_portal/app.py
+    lines: [7, 8]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.2(u)"]
+  - title: "Slack webhook secret URL hardcoded in source"
+    file: hr_portal/app.py
+    line: 5
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)"]
+  - title: "Medical leave reasons stored in plaintext in a local SQLite file with no encryption, masking or file-permission controls"
+    file: hr_portal/app.py
+    lines: [3, 4]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No access or processing logs for reads/writes of employee medical data, so unauthorised access cannot be detected or investigated and the one-year log retention cannot be met"
+    file: hr_portal/app.py
+    lines: [7, 14]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.8(3)", "Act s.8(6)", "Rules r.7"]
+  - title: "No retention period or erasure path for medical leave reasons; data is kept indefinitely (including after employment ends)"
+    file: hr_portal/app.py
+    line: 4
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Rules r.8(3)"]
+  - title: "Leave data model overwrites a single medical_leave_reason column and never stores days/dates or approval, losing history and risking inaccurate records used for employment decisions"
+    file: hr_portal/app.py
+    lines: [4, 8]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(3)"]
+  - title: "No error handling: missing employee row causes a crash after the DB write, and urlopen has no timeout or failure handling (availability/integrity)"
+    file: hr_portal/app.py
+    lines: [9, 11]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Rules r.6(1)(d)"]
+legal_questions:
+  - "Does Act s.7(i) (employment purposes) cover collecting and storing the specific medical reason for leave, or only the fact of leave? If not, what ground (consent under s.6) applies?"
+  - "Is sharing an employee's medical leave reason to a Slack channel within the s.7(i) employment purpose, and who are the recipients of that channel?"
+  - "Is Slack (or the webhook operator) a Data Processor under a valid s.8(2) contract, and where is the data stored (s.16 / any notified restriction)?"
+  - "What retention period for leave and medical records is required by Indian labour/shops-and-establishments law, and how does it interact with s.8(7) and Rules r.8(3)?"
+  - "Where and how does the company publish the s.8(9) contact and the s.8(10) grievance mechanism for employees? (Not visible in this repo.)"
+  - "Confirm the operator is a private company (not 'State' under Art. 12) and that no s.17(3)/s.17(5) exemption notification covers it."
+summary: "The HR leave portal processes digital personal data of employees of a Pune company (names, work emails, manager links, free-text medical leave reasons) in India, so the Act applies (s.3(a)) with the company as Data Fiduciary, likely relying on s.7(i) employment legitimate use; the substantive duties (s.4-s.17, Rules r.3, r.5-r.16) commence on 13 May 2027 and are not yet in force on 2026-10-30. The most serious problems are a broken access control that exposes every employee's medical leave reason to any caller, unauthenticated writes, and broadcasting names plus medical reasons to Slack, followed by a hardcoded webhook secret, plaintext storage, no audit logging and no retention/erasure."

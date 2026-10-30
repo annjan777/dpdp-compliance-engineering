@@ -61,4 +61,4 @@ evidence:
     date: 2026-10-29
 ```
 
-Good evidence references let another agent reopen the exact lines. Don't paste personal data, secrets or production records into `summary`. Describe them instead ("contains real email addresses").
+Good evidence references let another agent reopen the exact lines. Take line numbers from a read of that single file. `cat -n a b` numbers both files as one sequence, so every line cited in the second file comes out wrong (this happened in the benchmark pilot). Don't paste personal data, secrets or production records into `summary`. Describe them instead ("contains real email addresses").

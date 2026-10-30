@@ -1,0 +1,36 @@
+{
+  "scorer_version": "0.1",
+  "case": "b06-offshore-processor",
+  "malformed": [],
+  "integrity": {
+    "invalid_citations": [],
+    "compliance_claims": []
+  },
+  "components": {
+    "recall": 1.0,
+    "status": null,
+    "precision": 1.0,
+    "evidence": 0.75
+  },
+  "matched": {
+    "T1": 1.0,
+    "T2": 1.0
+  },
+  "false_positives": [],
+  "human_review": {
+    "status_submitted": "partially-applicable",
+    "defensible": [
+      "partially-applicable",
+      "not-currently-applicable",
+      "potentially-applicable"
+    ],
+    "notes": [
+      "US laws (e.g. HIPAA) may apply; outside this benchmark's DPDP scope and not scored."
+    ]
+  },
+  "notes": [
+    "unsupported evidence location: etl/load_members.py:(13, 19)",
+    "unsupported evidence location: etl/load_members.py:(12, 19)"
+  ],
+  "score": 0.9531
+}

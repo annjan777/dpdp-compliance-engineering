@@ -1,0 +1,65 @@
+overall_status: partially-applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.3(c)(i)", "Act s.2(n)"]
+findings:
+  - title: "Crash report sends the user's email, OS username, folder path and full file listing to the developers without any notice or consent"
+    file: photosort/main.py
+    lines: [20, 26]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4(1)", "Act s.5(1)", "Act s.6(1)", "Rules r.3"]
+  - title: "Crash payload goes beyond what debugging needs: email, OS username and a list of every file name in the folder (names may identify the user and third parties)"
+    file: photosort/main.py
+    lines: [21, 24]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(1)", "Act s.8(1)"]
+  - title: "user_email is passed into the core sort function only so it can go into telemetry, tying identity to crash data"
+    file: photosort/main.py
+    line: 12
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.6(1)"]
+  - title: "No opt-out or consent-withdrawal path and no grievance contact for crash telemetry; reporting is unconditional"
+    file: photosort/telemetry.py
+    lines: [1, 6]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)", "Act s.8(10)", "Act s.13(1)", "Rules r.3(c)"]
+  - title: "No retention limit or erasure for crash payloads: they build up in SENT and on the developers' server with no deletion"
+    file: photosort/telemetry.py
+    lines: [2, 6]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)", "Rules r.8"]
+  - title: "No security safeguards in the telemetry pipeline: no pseudonymisation or redaction of the payload or of paths/usernames inside the traceback, and no access-log design for the developers' collection server"
+    file: photosort/telemetry.py
+    lines: [1, 6]
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)"]
+  - title: "Exception handler calls os.listdir(src) again, which can raise (missing or unreadable src) and hide the original error"
+    file: photosort/main.py
+    line: 24
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "Year is taken from the first 4 digits of the epoch mtime (e.g. '1700'), not the calendar year, so files are sorted into the wrong folders; failures part-way through leave files partly moved"
+    file: photosort/main.py
+    lines: [16, 18]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: []
+legal_questions:
+  - "Is crash reporting turned on (actually sent to CRASH_ENDPOINT) in distributed builds? The code shown only appends to an in-memory list, so the developers' fiduciary obligations depend on transmission really happening."
+  - "Is the two-person developer team (individuals or a firm) the Data Fiduciary for crash telemetry, and is any part of the open-source distribution or crash server operated by another entity that could be a Data Processor?"
+  - "Can crash telemetry rely on consent alone, or does any s.7 legitimate use apply? Our view is that consent is required."
+  - "Do the startup exemptions under Act s.17(3) or later Central Government notifications reduce the obligations for this small team?"
+summary: "Sorting the user's own photos runs locally and is personal/domestic processing by the individual, which s.3(c)(i) excludes from the Act. The crash-telemetry path is different: it collects the user's email, OS username, folder path, file names and a traceback for the developers' own server in Hyderabad, which makes the developers a Data Fiduciary under s.3(a). That path has no notice, no consent, no minimisation, no withdrawal or grievance route, no retention limits and no safeguards."

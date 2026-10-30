@@ -1,0 +1,73 @@
+overall_status: partially-applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.3(c)(i)", "Act s.4", "G.S.R. 843(E)"]
+findings:
+  - title: "Crash reports send the user's email, OS username, folder path and file listing to the developers' server with no notice or consent"
+    file: photosort/main.py
+    lines: [20, 26]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.5(1)", "Act s.6(1)", "Rules r.3"]
+  - title: "Crash payload collects far more personal data than debugging needs (email, OS username, full source path, every file name in the folder)"
+    file: photosort/main.py
+    lines: [21, 24]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(1)", "Act s.8(4)"]
+  - title: "sort_folder takes user_email even though sorting never uses it; it exists only to be sent in crash reports"
+    file: photosort/main.py
+    line: 12
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(1)"]
+  - title: "Crash reporting is always on: no opt-in, no opt-out and no way to withdraw consent"
+    file: photosort/telemetry.py
+    lines: [5, 6]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)"]
+  - title: "Raw traceback is sent without redaction; local paths and file names in it can reveal usernames, people's names and places"
+    file: photosort/main.py
+    line: 25
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No retention limit or erasure path for crash reports, either in the SENT buffer or on the developers' server"
+    file: photosort/telemetry.py
+    lines: [2, 6]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12", "Rules r.8(3)"]
+  - title: "No published contact, grievance route or rights process for people whose crash data is collected"
+    file: README.md
+    lines: [1, 3]
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.8(9)", "Act s.8(10)", "Rules r.9", "Rules r.14(1)"]
+  - title: "Exception handler calls os.listdir(src) again; if src is missing or unreadable this raises a new error that hides the original crash"
+    file: photosort/main.py
+    line: 24
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "Year is taken from the first 4 digits of the epoch mtime (e.g. '1730'), not the calendar year, so files are misfiled; shutil.move can also silently overwrite files with the same name"
+    file: photosort/main.py
+    lines: [16, 18]
+    category: operational-weakness
+    severity: medium
+    mandatory: false
+    citations: []
+legal_questions:
+  - "Can crash reporting rely on s.7(a) (voluntarily provided for a specified purpose), or is consent under s.6 required, given the user never actively chooses to submit a report?"
+  - "Are the OS username and the file and folder names in crash reports 'personal data' under s.2(t) for the developers, and is the two-person team the Data Fiduciary for crash data under s.2(i)?"
+  - "Does any s.17(3) or s.17(5) notification (e.g. a startup exemption) cover this two-person team? None is known as of 2026-10-31."
+  - "Substantive duties (s.4 to s.17, Rules r.3 and r.5 to r.16) start on 13 May 2027 under G.S.R. 843(E). Confirm that date against the gazette."
+  - "If users can be under 18, does s.9 parental consent apply to crash telemetry from them?"
+summary: "The tool's local photo sorting is a user's personal or domestic processing and falls outside the Act under s.3(c)(i). The crash-reporting path is different: it sends the user's email, OS username, folder path, file names and traceback to a server run by a team based in India, so the developers process digital personal data in India as a fiduciary under s.3(a). That activity is in scope, but its substantive duties start on 13 May 2027. The main gaps are no notice or consent, collection beyond what debugging needs, no opt-out, and no retention or rights process; telemetry.py is currently a stub that only buffers reports in memory."

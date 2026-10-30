@@ -1,0 +1,103 @@
+overall_status: applicable
+citations: ["Act s.3(a)", "Act s.2(t)", "Act s.2(n)", "Act s.2(i)", "Act s.2(j)", "Act s.2(k)", "Act s.2(x)", "Act s.8(1)", "Act s.8(2)"]
+findings:
+  - title: "Shared, un-scoped vector store: one borrower's uploaded documents are retrieved into other borrowers' chats (cross-user personal data disclosure)"
+    file: bot/service.py
+    lines: [6, 17]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)", "Act s.2(u)"]
+  - title: "VectorStore stores documents with no owner/user_id and search ignores the query and caller, returning the first k items from all users"
+    file: bot/store.py
+    lines: [9, 13]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "Uploaded documents from any user are injected verbatim into every user's LLM prompt, enabling cross-user indirect prompt injection and exfiltration of the victim's profile (PAN, phone, income)"
+    file: bot/service.py
+    lines: [6, 9]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "Account deletion only removes the users dict entry; chat history and uploaded documents (vectors) are retained indefinitely, so erasure is incomplete"
+    file: bot/service.py
+    lines: [20, 21]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.12(3)", "Act s.8(7)", "Act s.6(4)", "Act s.6(6)"]
+  - title: "Uploaded documents cannot be linked back to the uploader, so access, correction and erasure requests cannot be fulfilled for document data"
+    file: bot/service.py
+    lines: [16, 17]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.11(1)", "Act s.12(1)", "Act s.12(3)", "Act s.8(7)"]
+  - title: "Every prompt sends PAN, phone number and income to the third-party LLM regardless of whether the question needs them (no data minimisation / purpose limitation)"
+    file: bot/service.py
+    lines: [7, 10]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4(1)", "Act s.6(1)", "Act s.7(a)", "Act s.8(5)"]
+  - title: "Personal data transferred to a US-hosted model provider acting as Data Processor with no evidence of a processing contract, security terms, or deletion/no-training commitments"
+    file: bot/llm.py
+    line: 1
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(2)", "Act s.8(5)", "Act s.16(1)", "Act s.16(2)", "Rules r.15", "Rules r.6(1)(f)"]
+  - title: "Chat history (including free-text financial details) is stored with no retention limit or purge mechanism"
+    file: bot/service.py
+    lines: [5, 12]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.8(8)"]
+  - title: "No notice or consent capture before collecting chat messages and documents, and no withdrawal mechanism that stops processing"
+    file: bot/service.py
+    lines: [4, 17]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.5(1)", "Act s.6(1)", "Act s.6(4)", "Rules r.3"]
+  - title: "Personal data (PAN, phone, income, chat transcripts, documents) held in plaintext in-memory structures with no encryption or access control"
+    file: bot/store.py
+    lines: [1, 2]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)"]
+  - title: "No access logging or monitoring of personal data access, so breaches (e.g. cross-user retrieval) cannot be detected, investigated or reported to the Board and affected principals"
+    file: bot/service.py
+    lines: [4, 21]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Rules r.6(1)(c)", "Rules r.6(1)(e)", "Act s.8(6)", "Rules r.7"]
+  - title: "No mechanism for data principals to obtain a summary of their personal data or of the processor (LLM provider) it was shared with"
+    file: bot/service.py
+    lines: [1, 21]
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.11(1)", "Act s.13", "Rules r.14"]
+  - title: "No age verification or verifiable parental consent path, if minors can sign up"
+    file: bot/service.py
+    line: 4
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.9(1)", "Rules r.10"]
+legal_questions:
+  - "As of 31 Oct 2026 most Data Fiduciary obligations (s.4-s.10, s.11-s.17) are not yet in force under the phased commencement (expected ~13 May 2027); what is the compliance timeline and are any obligations enforceable now?"
+  - "Do RBI digital lending directions / data localisation requirements (preserved by Act s.16(2)) restrict sending borrower PAN, income and loan data to a US-hosted LLM provider?"
+  - "Is consent (s.6) or a legitimate use (s.7) the correct lawful basis for each purpose (loan servicing chat vs. document Q&A), and what notice text satisfies Rules r.3?"
+  - "Will the operator be notified as a Significant Data Fiduciary under s.10 given volume/sensitivity of financial data, triggering DPO, DPIA and audit duties (Rules r.13)?"
+  - "Does the cross-user document exposure already constitute a personal data breach requiring intimation to the Board and affected principals under s.8(6) and Rules r.7?"
+  - "What retention period applies to chat history and documents given sectoral record-keeping obligations that may override erasure under s.8(7)/s.12(3)?"
+  - "Can minors use the service (s.9), or is it restricted to adult borrowers by design?"
+summary: "The loan-helper chatbot processes digital personal data (names, PAN, phone, income, chat transcripts, uploaded documents) of borrowers in India, so the DPDP Act applies under s.3(a), with the operator as Data Fiduciary and the US LLM provider as Data Processor. The most serious defect is a shared, un-scoped vector store that leaks one user's documents into other users' prompts (also a prompt-injection vector); deletion is incomplete, PAN/phone/income are sent to the LLM unnecessarily, and there is no retention, notice/consent, logging or processor-contract evidence. Substantive obligations are phasing in (expected May 2027), but the security flaws should be fixed immediately."

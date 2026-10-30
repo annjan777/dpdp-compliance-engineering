@@ -1,0 +1,14 @@
+{
+  "case": "b07-rag-chatbot",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 8,
+  "costUsd": 0.3451182,
+  "durationSeconds": 50,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 6,
+  "leak_hits": []
+}

@@ -1,0 +1,57 @@
+overall_status: partially-applicable
+citations: ["Act s.2(t)", "Act s.2(k)", "Act s.3(a)", "Act s.17(1)(d)", "Act s.8(1)", "Act s.8(5)", "Rules r.6(1)"]
+findings:
+  - title: "Member name and full SSN written to application logs in plaintext for every row"
+    file: etl/load_members.py
+    line: 15
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Act s.17(1)(d)", "Rules r.6(1)(a)"]
+  - title: "SSN stored unencrypted/unmasked in the reporting database"
+    file: etl/load_members.py
+    lines: [10, 14]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Act s.17(1)(d)", "Rules r.6(1)(a)"]
+  - title: "Health diagnosis codes stored in plaintext alongside direct identifiers (name, SSN, DOB)"
+    file: etl/load_members.py
+    lines: [10, 14]
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "Reporting database is a local SQLite file with no access control, created with default filesystem permissions"
+    file: etl/load_members.py
+    lines: [8, 9]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No access/audit logging of who reads or exports member data from the reporting DB"
+    file: etl/load_members.py
+    lines: [8, 16]
+    category: operational-weakness
+    severity: low
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)"]
+  - title: "Full SSN loaded into a reporting store although reporting likely needs only member_id (data minimisation)"
+    file: etl/load_members.py
+    line: 14
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.17(1)(d)"]
+  - title: "No retention limit or deletion of member records once the contracted purpose ends (s.8(7) disapplied by s.17(1)(d), but advisable)"
+    file: etl/load_members.py
+    line: 10
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(7)", "Act s.17(1)(d)"]
+legal_questions:
+  - "Does the s.17(1)(d) exemption hold in full: are all data principals in the feed genuinely outside India, and is the processing done strictly under the contract with the US insurer (no Indian residents, NRIs with Indian addresses, or onward use)?"
+  - "Who bears the s.8(1) and s.8(5) obligations that s.17(1)(d) preserves: the foreign insurer as Data Fiduciary (s.3(a) processing within India) or, in practice, the Chennai company as Data Processor? Do Rules r.6 safeguards bind it directly or only through contract?"
+  - "Has the Central Government issued any notification affecting the s.17(1)(d) exemption, and do any sectoral Indian rules (e.g. CERT-In directions on log retention and incident reporting) apply separately?"
+summary: "The Chennai company processes digital personal data within India (s.3(a)), but only for non-resident US data principals under a contract with a foreign insurer, so s.17(1)(d) exempts it from most of the Act. Consent, notice, data principal rights, breach notification and retention do not apply, but s.8(1) and the s.8(5) duty to keep reasonable security safeguards still do. The code breaches s.8(5): it logs full SSNs with names and stores SSNs and diagnosis codes unencrypted in an SQLite file with no access control."

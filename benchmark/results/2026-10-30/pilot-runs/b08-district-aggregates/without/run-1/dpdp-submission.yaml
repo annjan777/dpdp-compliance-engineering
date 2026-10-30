@@ -1,0 +1,5 @@
+overall_status: not-currently-applicable
+citations: ["Act s.2(t)", "Act s.3(a)"]
+findings: []
+legal_questions: []
+summary: "The dashboard only reads the state's published open-data CSV of district-level monthly dengue case counts (district, month, patient_count) and sums and ranks them; no individual records, identifiers, or data about an identifiable person are collected, stored, or processed. Aggregate counts at district level are not 'personal data' under Act s.2(t), so the processing falls outside the Act's scope under s.3(a), and no DPDP obligations or privacy/security defects arise from the current code. Reassess if the input ever gains record-level or small-cell (sub-district or very low count) data that could identify individuals."

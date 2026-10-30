@@ -1,0 +1,66 @@
+overall_status: partially-applicable
+citations: ["Act s.2(t)", "Act s.3(a)", "Act s.17(1)(d)", "Act s.8(1)", "Act s.8(5)", "Rules r.6(1)", "G.S.R. 843(E)"]
+findings:
+  - title: "Member name and SSN written in plaintext to application logs for every loaded row"
+    file: etl/load_members.py
+    line: 18
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)", "Act Sch. item 1"]
+  - title: "SSN, date of birth and diagnosis code stored unencrypted, without masking or tokenisation, in a local SQLite file"
+    file: etl/load_members.py
+    lines: [12, 17]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No access control on the reporting database: default relative path reporting.db, no file permissions set, no authentication"
+    file: etl/load_members.py
+    line: 11
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No access or processing logs that identify who reads the member data (the only log copies personal data instead of recording access by identifier)"
+    file: etl/load_members.py
+    line: 18
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)"]
+  - title: "Nothing checks that every record belongs to a non-India resident; the s.17(1)(d) exemption depends on this, and the claim rests only on the README"
+    file: etl/load_members.py
+    lines: [15, 17]
+    category: operational-weakness
+    severity: medium
+    mandatory: false
+    citations: ["Act s.17(1)(d)", "Act s.3(a)"]
+  - title: "SSN copied into the reporting store although reporting probably does not need it (data minimisation)"
+    file: etl/load_members.py
+    line: 13
+    category: best-practice
+    severity: medium
+    mandatory: false
+    citations: []
+  - title: "No retention limit or deletion path for loaded member records; rows pile up across runs with no deduplication (s.8(7) is disapplied by s.17(1)(d), so this is good practice, not a legal requirement)"
+    file: etl/load_members.py
+    lines: [13, 19]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.17(1)(d)"]
+  - title: "Database connection never closed and no error handling or rollback, so a failed load can leave partial data"
+    file: etl/load_members.py
+    lines: [12, 19]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+legal_questions:
+  - "Does the Chennai company process this data under a contract with a person outside India (the US insurer), and are all Data Principals outside India, so that the Act s.17(1)(d) exemption is fully met for every record?"
+  - "Under the s.17(1)(d) exemption, do the Rules r.6 minimum safeguards apply alongside Act s.8(5) (which stays in force)? Or does only the general s.8(5) duty apply?"
+  - "Does s.8(1) still bind the Chennai company as a Data Fiduciary, or is it only a Data Processor for the US insurer (Act s.2(i), s.2(k))? Who owes the s.8(5) duty for this processing?"
+  - "s.8(5) commences on 13 May 2027 (G.S.R. 843(E)). Please confirm that date against the gazette."
+  - "Because breach notification (Act s.8(6)) is disapplied by s.17(1)(d), what contractual and US-law (e.g. HIPAA) breach duties apply instead? This is outside the DPDP scope."
+summary: "The ETL runs in Chennai and processes digital personal data in India, so the Act applies under s.3(a). But all the Data Principals are US residents and the processing is done under a contract with a US insurer, so s.17(1)(d) exempts it from most of the Act. Only the s.8(1) accountability duty and the s.8(5) security safeguards still apply, and they come into force on 13 May 2027. The code has serious security gaps that affect those surviving duties: SSNs and names are logged in plaintext, SSN, date of birth and diagnosis are stored unencrypted in a SQLite file with no access control, and nothing checks that the exemption's 'no India residents' condition actually holds."

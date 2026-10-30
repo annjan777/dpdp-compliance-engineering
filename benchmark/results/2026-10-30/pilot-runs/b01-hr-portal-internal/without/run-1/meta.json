@@ -1,0 +1,14 @@
+{
+  "case": "b01-hr-portal-internal",
+  "arm": "without",
+  "run": 1,
+  "error": null,
+  "turns": 4,
+  "costUsd": 0.2264364,
+  "durationSeconds": 48,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": false,
+  "tool_calls": 3,
+  "leak_hits": []
+}

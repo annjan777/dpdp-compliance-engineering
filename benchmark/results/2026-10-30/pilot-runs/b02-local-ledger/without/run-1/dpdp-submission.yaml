@@ -1,0 +1,35 @@
+overall_status: not-currently-applicable
+citations: ["Act s.2(i)", "Act s.2(t)", "Act s.3(a)", "Act s.3(c)(i)"]
+findings:
+  - title: "CSV export defaults to a predictable filename in the shared system temp directory, created with default umask permissions (readable by other local users; symlink/pre-creation risk on multi-user hosts)"
+    file: ledger/core.py
+    lines: [24, 26]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: []
+  - title: "SQLite database at ~/.pocket-ledger.db is created with default permissions and stored unencrypted; expense notes may be readable by other local accounts"
+    file: ledger/core.py
+    lines: [6, 10]
+    category: security-vulnerability
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "Export writes user-controlled 'note' values to CSV without neutralising leading =,+,-,@ (spreadsheet formula injection when the file is opened in Excel/LibreOffice)"
+    file: ledger/core.py
+    line: 29
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "No delete/purge function for entries or exported files; users cannot easily erase records (notes may contain third parties' names)"
+    file: ledger/core.py
+    lines: [15, 30]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+legal_questions:
+  - "If an employer or other organisation distributes Pocket Ledger and requires staff to record expenses in it (or collects the exports), does that organisation become a Data Fiduciary under Act s.2(i), taking the processing outside the s.3(c)(i) personal/domestic exemption?"
+  - "If the author later adds sync, accounts, crash reporting or any telemetry, would the author become a Data Fiduciary (or Data Processor) and need notice/consent (Act s.5, s.6) and security safeguards (Act s.8(5), Rules r.6)?"
+summary: "Pocket Ledger is a local-only, offline tool: each individual records their own expenses on their own machine, and the author never receives, determines the purpose of, or controls any personal data, so the author is not a Data Fiduciary (Act s.2(i)) and users' processing falls under the personal/domestic-purpose exclusion (Act s.3(c)(i)); the Act is therefore not currently applicable. The code nonetheless has non-mandatory security issues—chiefly the CSV export defaulting to a predictable, world-readable file in the shared temp directory—plus default file permissions, CSV formula injection and no deletion path. Applicability would change if the tool gains a server/telemetry component or is deployed by an organisation for its own purposes."

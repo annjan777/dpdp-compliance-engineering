@@ -1,0 +1,88 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.3(b)", "Act s.4", "G.S.R. 843(E)"]
+findings:
+  - title: "Shared, unscoped vector store: one borrower's uploaded documents are retrieved into other borrowers' prompts and answers"
+    file: bot/store.py
+    lines: [9, 13]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.2(u)", "Act s.8(6)", "Act Sch. item 1"]
+  - title: "upload_document stores loan documents with no owner/user_id, so they cannot be access-controlled or erased per user"
+    file: bot/service.py
+    lines: [16, 17]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.8(7)"]
+  - title: "Account deletion removes only the users entry; chat history and uploaded documents in the vector store remain, and nothing propagates to the LLM provider"
+    file: bot/service.py
+    lines: [20, 21]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)", "Act s.6(6)", "Rules r.8(3)"]
+  - title: "Every prompt sends name, PAN, phone and income to a US-hosted LLM provider regardless of whether the question needs them (no minimisation/masking)"
+    file: bot/service.py
+    lines: [7, 10]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.6(1)", "Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "Third-party LLM provider (US) processes borrower data with no evidence of a processor contract, transfer record or security clauses"
+    file: bot/llm.py
+    line: 1
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(1)", "Act s.8(2)", "Rules r.6(1)(f)", "Act s.16"]
+  - title: "No notice, consent capture or recorded lawful ground for chat, profile use in prompts, or document upload"
+    file: bot/service.py
+    lines: [4, 17]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.4", "Act s.5(1)", "Rules r.3", "Act s.6(1)", "Act s.6(10)"]
+  - title: "Chat history stored in plaintext indefinitely with no retention limit or purpose-end erasure"
+    file: bot/store.py
+    line: 2
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No access/processing logs or monitoring for reads of PAN, income, history and documents; no means to detect or investigate a breach"
+    file: bot/service.py
+    lines: [4, 21]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.8(3)", "Act s.8(6)", "Rules r.7"]
+  - title: "No mechanism for data principal rights other than account deletion (access summary, correction, grievance) and no published contact"
+    file: bot/service.py
+    lines: [20, 21]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.11", "Act s.12", "Act s.8(9)", "Act s.8(10)", "Act s.13", "Rules r.9", "Rules r.14(1)"]
+  - title: "Untrusted uploaded document text injected directly into the LLM prompt alongside profile PII (prompt injection can exfiltrate PAN/phone/income)"
+    file: bot/service.py
+    lines: [6, 11]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)"]
+  - title: "Service functions trust the caller-supplied user object; no authentication/authorisation check at the service boundary"
+    file: bot/service.py
+    lines: [4, 21]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Rules r.6(1)(b)"]
+legal_questions:
+  - "Is the lender the Data Fiduciary and the chatbot operator a processor, or is the operator an independent fiduciary (Act s.2(i), s.2(k))?"
+  - "What is the lawful ground for each purpose (loan-servicing chat, using profile data in prompts, document upload): consent or s.7(a) voluntary provision?"
+  - "Is the US LLM provider a processor under a valid contract, and do any s.16 notifications or stricter sectoral rules (e.g. RBI digital lending / outsourcing directions, s.16(2)) restrict sending PAN and income data abroad?"
+  - "On account deletion, which data must be retained (Rules r.8(3) one-year log retention; KYC/lending record-keeping laws) and which must be erased under s.8(7)?"
+  - "Can minors use the app (Act s.9), or is age reliably excluded by the loan relationship?"
+  - "Confirm the commencement split in G.S.R. 843(E): substantive duties (s.4-s.17, Rules r.3, r.5-r.16) apply from 13 May 2027 and are not yet enforceable on 2026-10-31."
+summary: "The app processes digital personal data (name, PAN, phone, income, chat text, loan documents) of borrowers in India, so the DPDP Act applies; the substantive fiduciary duties commence on 13 May 2027 and are applicable but not yet in force at the assessment date (2026-10-31). The most serious problem is a global, unscoped vector store that leaks one borrower's documents into other borrowers' LLM context, followed by incomplete account deletion (history and documents survive) and unminimised transfer of PAN/income to a US LLM provider without evidence of a processor contract. This is an engineering assessment, not legal advice."

@@ -1,0 +1,73 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(n)", "Act s.2(i)", "Act s.3(a)", "Act s.7(i)", "Act s.8(1)"]
+findings:
+  - title: "list_leaves ignores requester_id, so any caller can read every employee's name and medical leave reason (broken access control)"
+    file: hr_portal/app.py
+    lines: [13, 14]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.4(1)", "Act s.6(1)"]
+  - title: "Free-text leave reasons, including health details, are broadcast with the employee's name to a Slack channel, a third-party processor and a wider audience than the approving manager"
+    file: hr_portal/app.py
+    lines: [10, 11]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.7(i)", "Act s.8(2)", "Act s.8(5)", "Rules r.6(1)(f)", "Act s.16(1)"]
+  - title: "Slack webhook URL (a bearer secret) is hardcoded in source"
+    file: hr_portal/app.py
+    line: 5
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "Health-related leave reasons are stored in plaintext in a local SQLite file with no encryption, masking or file-permission controls"
+    file: hr_portal/app.py
+    lines: [3, 4]
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No logging or monitoring of who accesses or discloses personal data, and no log retention, so a breach cannot be detected or investigated"
+    file: hr_portal/app.py
+    lines: [7, 14]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Rules r.6(1)(c)", "Rules r.6(1)(e)", "Act s.8(6)", "Rules r.7"]
+  - title: "Leave reasons are kept indefinitely with no retention or erasure logic, including after the employee leaves"
+    file: hr_portal/app.py
+    line: 4
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)"]
+  - title: "apply_leave doesn't authenticate or check the caller, so anyone can write a leave reason against any emp_id. It also crashes when the ID doesn't exist"
+    file: hr_portal/app.py
+    lines: [7, 9]
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.8(3)"]
+  - title: "Every leave reason, medical or not, goes into a single medical_leave_reason column and overwrites the previous one, which loses the leave history and stores more health detail than needed"
+    file: hr_portal/app.py
+    lines: [4, 8]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(3)", "Act s.7(i)"]
+  - title: "No way for employees to access, correct or erase their data, or to raise a grievance"
+    file: hr_portal/app.py
+    lines: [7, 14]
+    category: operational-weakness
+    severity: low
+    mandatory: true
+    citations: ["Act s.11(1)", "Act s.12(1)", "Act s.13(1)", "Act s.8(10)", "Rules r.14(1)"]
+legal_questions:
+  - "Does the employment legitimate use in s.7(i) cover sending identifiable health reasons to a company-wide or team Slack channel, or only disclosure to the approving manager and HR?"
+  - "Is there a valid contract with Slack as Data Processor under s.8(2), and are the security terms in r.6(1)(f) included? Is Slack storage outside India subject to any s.16 restriction?"
+  - "Most Data Fiduciary obligations (s.8, s.11-13, Rules r.3-r.8) take effect 18 months after the Rules were notified on 13 Nov 2025, around May 2027. Should remediation be planned for that date, and is any part already in force?"
+  - "How long may leave and medical records be kept to satisfy labour law, such as the Factories Act or the Maharashtra Shops and Establishments Act, before s.8(7) requires erasure?"
+  - "If a Slack disclosure has already happened, does it count as a personal data breach that must be reported to the Board and to affected employees under s.8(6) and r.7?"
+summary: "The portal is run by a company in Pune and processes digital personal data of employees in India: names, work emails, reporting lines and free-text medical leave reasons. The DPDP Act therefore applies under s.3(a). Employment purposes give a consent-free legitimate use under s.7(i), but the s.8 security, retention and processor obligations still apply. The main problems are that list_leaves exposes every employee's medical reason to any caller, health details are broadcast to Slack, a webhook secret is hardcoded, and the code has no encryption, access logging or retention controls."

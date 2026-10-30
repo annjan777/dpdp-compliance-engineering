@@ -1,0 +1,14 @@
+{
+  "case": "b04-school-ads",
+  "arm": "without",
+  "run": 1,
+  "error": null,
+  "turns": 5,
+  "costUsd": 0.274493,
+  "durationSeconds": 64,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": false,
+  "tool_calls": 4,
+  "leak_hits": []
+}

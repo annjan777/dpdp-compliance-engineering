@@ -1,0 +1,14 @@
+{
+  "case": "b03-campus-clinic",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 10,
+  "costUsd": 0.4541050000000001,
+  "durationSeconds": 70,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 8,
+  "leak_hits": []
+}

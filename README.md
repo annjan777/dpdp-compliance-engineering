@@ -39,6 +39,13 @@ dpdp-compliance-engineering/
 └── evals/                           # 5 behavioural test cases (claude plugin eval format; not packaged)
 ```
 
+## Measured results (pilot)
+
+See `benchmark/RESULTS.md`. In short, on `claude-opus-5-5`:
+- **Behavioural cases (LLM-graded, 15 runs per arm):** 0.97 with the skill vs 0.78 without. The gap is mostly in handling legal uncertainty and reporting.
+- **12-case deterministic benchmark:** 0.984 with the skill vs 1.000 without. That is no detection benefit; the cases are too easy.
+- Small samples, synthetic fixtures, and the author wrote the tests.
+
 ## Install
 
 **Claude Code (one user, all repos):** copy the folder to `~/.claude/skills/dpdp-compliance-engineering/`.

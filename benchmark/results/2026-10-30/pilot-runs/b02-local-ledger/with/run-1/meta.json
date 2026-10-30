@@ -1,0 +1,14 @@
+{
+  "case": "b02-local-ledger",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 7,
+  "costUsd": 0.247993,
+  "durationSeconds": 34,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 5,
+  "leak_hits": []
+}

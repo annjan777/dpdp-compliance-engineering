@@ -1,0 +1,14 @@
+{
+  "case": "b08-district-aggregates",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 7,
+  "costUsd": 0.202132,
+  "durationSeconds": 22,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 5,
+  "leak_hits": []
+}

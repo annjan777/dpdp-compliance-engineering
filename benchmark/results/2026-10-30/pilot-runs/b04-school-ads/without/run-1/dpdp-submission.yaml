@@ -1,0 +1,95 @@
+overall_status: applicable
+citations: ["Act s.2(f)", "Act s.2(i)", "Act s.2(t)", "Act s.3(a)", "Act s.7(b)", "Act s.9(1)", "Act s.9(3)", "Rules r.10(1)", "Rules r.12"]
+findings:
+  - title: "Children's identifiers, class, DOB, topic and dwell time sent to a third-party ad network (tracking / behavioural monitoring of children)"
+    file: school/app.py
+    line: 19
+    category: legal-gap
+    severity: critical
+    mandatory: true
+    citations: ["Act s.9(3)", "Act s.9(2)", "Act s.4(1)", "Rules r.12"]
+  - title: "Targeted advertising directed at pupils (ad picked using pupil's topic interests and DOB-derived age)"
+    file: school/app.py
+    line: 20
+    category: legal-gap
+    severity: critical
+    mandatory: true
+    citations: ["Act s.9(3)", "Act s.9(2)", "Rules r.12"]
+  - title: "Ad SDK accepts interests and age for ad targeting and retains all tracked events indefinitely"
+    file: school/adnet.py
+    lines: [2, 10]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.9(3)", "Act s.8(7)"]
+  - title: "No verifiable parental consent or notice for processing children's data beyond the attendance/educational purpose (ad tracking falls outside the Fourth Schedule educational-institution exemption)"
+    file: school/app.py
+    lines: [16, 20]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.9(1)", "Act s.5(1)", "Act s.6(1)", "Rules r.10(1)", "Rules r.3", "Rules r.12"]
+  - title: "Attendance-purpose data (class, DOB) repurposed for advertising; full DOB disclosed rather than minimised"
+    file: school/app.py
+    line: 17
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4(1)", "Act s.6(1)", "Act s.7(b)"]
+  - title: "Personal data of children shared with ad network hosted outside India with no contract, transfer assessment or safeguards"
+    file: school/adnet.py
+    line: 1
+    category: best-practice
+    severity: medium
+    mandatory: false
+    citations: ["Act s.16(1)", "Act s.16(2)", "Rules r.15", "Act s.8(2)"]
+  - title: "Pupil database stored in plaintext SQLite with no encryption, access control or access logging"
+    file: school/app.py
+    lines: [5, 7]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)", "Rules r.6(1)(c)"]
+  - title: "No logging/monitoring of access to personal data or retention of logs to detect and investigate breaches"
+    file: school/app.py
+    lines: [10, 20]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)"]
+  - title: "No personal data breach detection or notification process (Board and affected parents)"
+    file: school/app.py
+    line: 5
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(6)", "Rules r.7(1)", "Rules r.7(2)"]
+  - title: "No retention limit or erasure for pupil and attendance records after the purpose ends (e.g. pupil leaves school)"
+    file: school/app.py
+    lines: [6, 7]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)"]
+  - title: "No mechanism for parents to access, correct or erase data, nominate, or raise grievances; no published contact person"
+    file: school/app.py
+    line: 1
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.11", "Act s.12", "Act s.13", "Act s.14", "Act s.8(9)", "Act s.8(10)", "Rules r.9", "Rules r.14"]
+  - title: "Absence SMS (child's name + attendance) sent via SMS gateway processor with no processing contract; parent mobile not verified for accuracy"
+    file: school/app.py
+    lines: [12, 13]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(2)", "Act s.8(3)", "Act s.8(5)"]
+legal_questions:
+  - "Most substantive DPDP obligations (ss.4-17 and Rules r.3-r.16) commence 18 months after notification of the Rules (approx. 13 May 2027); confirm the commencement dates relied on and the remediation timeline."
+  - "Has the Central Government notified the Odisha school or education department as an instrumentality of the State exempt under Act s.17(2)(a) or under s.17(4)/s.7?"
+  - "Does attendance marking and absence SMS fall within Act s.7(b)/(c) legitimate uses and/or the Fourth Schedule educational-institution exemption from s.9(1) and s.9(3) under Rules r.12, so that verifiable parental consent is not needed for that purpose?"
+  - "Is the ad network a Data Processor of the school or an independent Data Fiduciary, and who (school, state department, or app vendor) is the Data Fiduciary for the sponsored-content feature?"
+  - "Is the ad network's host country subject to any restriction notified under Act s.16(1), and do sectoral rules (e.g. Odisha/RTE or education department guidelines) impose stricter limits preserved by s.16(2)?"
+  - "Can any form of sponsored content on a government school learning page be lawful for under-18 users given s.9(3), even with parental consent?"
+summary: "The app processes digital personal data of children (classes 1-10) and parent mobile numbers in India, so the DPDP Act applies, with the government school as Data Fiduciary; attendance processing is plausibly covered by State legitimate use and the Rules' educational-institution exemption, but feeding pupil IDs, class, DOB, topics and dwell time to an offshore ad network and serving targeted ads is tracking, behavioural monitoring and targeted advertising of children prohibited by s.9(3) and lacks verifiable parental consent. Supporting gaps include plaintext storage without access control or logging, no breach process, no retention/erasure, and no data principal rights or grievance channel; most obligations commence around May 2027."

@@ -1,0 +1,94 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.3(a)", "Act s.2(i)", "Act s.4", "Act s.6(1)", "Act s.7(a)", "G.S.R. 843(E)"]
+findings:
+  - title: "Account deletion leaves posts and digest opt-in rows behind; SQLite rowid reuse hands the deleted member's posts and opt-in to the next signup"
+    file: forum/app.py
+    lines: [8, 30]
+    category: security-vulnerability
+    severity: critical
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)", "Act s.2(u)"]
+  - title: "delete_account erases only the members row, not the member's posts or digest_optin record (erasure incomplete)"
+    file: forum/app.py
+    lines: [27, 30]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)", "Act s.6(6)"]
+  - title: "Digest sent to a member who never opted in: orphaned opted_in=1 row is joined to the reused member id (processing without consent)"
+    file: forum/app.py
+    lines: [33, 36]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.6(1)", "Act s.6(6)"]
+  - title: "No way to withdraw digest consent short of deleting the account"
+    file: forum/app.py
+    lines: [16, 20]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)"]
+  - title: "Digest consent stored as a bare flag with no timestamp, notice version or withdrawal history, so consent cannot be proved"
+    file: forum/app.py
+    line: 10
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(10)", "Act s.5(1)", "Rules r.3"]
+  - title: "No notice is shown or recorded at signup for the data collected (email, display name) or for the digest purpose"
+    file: forum/app.py
+    lines: [16, 20]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.5(1)", "Rules r.3"]
+  - title: "Schema has no foreign keys or ON DELETE CASCADE and ids are not AUTOINCREMENT, so referential integrity and non-reuse of ids are not enforced"
+    file: forum/app.py
+    lines: [8, 10]
+    category: security-vulnerability
+    severity: high
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "my_posts returns any member's posts for a caller-supplied member_id with no ownership or authorisation check"
+    file: forum/app.py
+    lines: [23, 24]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No logging of access to personal data or of deletion/erasure events; no log retention"
+    file: forum/app.py
+    lines: [16, 36]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.8(3)"]
+  - title: "No correction/update path for email or display name"
+    file: forum/app.py
+    lines: [16, 20]
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.12(1)", "Act s.12(2)"]
+  - title: "No access-summary function: only post bodies are returnable, not email, display name or digest status"
+    file: forum/app.py
+    lines: [23, 24]
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.11(1)"]
+  - title: "delete_account does not check the member exists or report success, so a failed erasure is silent"
+    file: forum/app.py
+    lines: [27, 30]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(7)"]
+legal_questions:
+  - "Who operates the forum, and is it an organisation (Data Fiduciary under s.2(i)) or an individual running it for personal/domestic purposes that s.3(c)(i) might exclude?"
+  - "Is signup processing (email, display name, posts) covered by the s.7(a) legitimate use (voluntarily provided for a specified purpose), or should it rest on consent? The digest opt-in is treated here as consent-based."
+  - "Can members be under 18? If so, s.9 verifiable parental consent (Rules r.10) applies at signup."
+  - "On account deletion, should posts be erased, or kept anonymised for thread continuity? And what must be kept for one year under Rules r.8(3) versus erased under s.8(7)?"
+  - "Does posting content made public on the forum fall under the s.3(c)(ii) exclusion for data the Data Principal made public, and for which uses?"
+summary: "The forum processes digital personal data (emails, display names, posts) of members, and the README describes a Bengaluru community, so the Act applies under s.3(a). Its fiduciary duties come into force on 13 May 2027, so they apply from that date and are not enforceable yet. The most serious problem is in delete_account: it removes only the members row. Because SQLite reuses rowids, the next person to sign up inherits the deleted member's posts and digest opt-in. This was reproduced with synthetic data. It is a live data-exposure bug and also defeats erasure and consent, and consent cannot currently be withdrawn or proved."

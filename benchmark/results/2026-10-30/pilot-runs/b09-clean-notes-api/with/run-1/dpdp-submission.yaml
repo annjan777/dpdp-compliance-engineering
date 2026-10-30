@@ -1,0 +1,37 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.3(a)", "Act s.3(b)", "Act s.2(i)", "Act s.4", "G.S.R. 843(E)"]
+findings:
+  - title: "Product-update consent can be given at signup but there is no way to withdraw it short of deleting the account"
+    file: src/app.js
+    line: 19
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)", "Rules r.3"]
+  - title: "Consent ledger and processing log keep the userId after erasure with no expiry; Rules r.8(3) asks for at least one year, then erasure unless another law requires retention"
+    file: src/db.js
+    lines: [14, 20]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Rules r.8(3)", "Act s.8(7)"]
+  - title: "Signup has no input validation (email format, duplicate emails, missing or weak password hashed as the string 'undefined') and no rate limiting"
+    file: src/app.js
+    lines: [16, 22]
+    category: security-vulnerability
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No self-service access summary or correction path; only account erasure is exposed (rights may be handled outside this code)"
+    file: src/app.js
+    lines: [30, 34]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.11", "Act s.12", "Rules r.14(1)"]
+legal_questions:
+  - "Can users under 18 sign up? If so, s.9 verifiable parental consent (Rules r.10) applies and the signup flow has no age handling."
+  - "Is account/note processing grounded on s.7(a) voluntary provision or on consent, and does notice-v3 meet s.5(1) and Rules r.3 (itemised data, withdrawal, rights, Board complaint, language option)?"
+  - "Which consent and erasure records must be kept under Rules r.8(3) and s.6(10) to prove consent, and for how long, versus erased under s.8(7)?"
+  - "Is the email provider used for product updates (not present in this repo) a processor under a valid s.8(2) contract, and does withdrawal propagate to it under s.6(6)?"
+summary: "This consumer notes API for users in India processes digital personal data (email, password hash, note content, session tokens) as a Data Fiduciary, so the Act applies under s.3(a)/(b), with substantive duties taking effect on 13 May 2027 under G.S.R. 843(E). The code is in good shape: notes are scoped to their owner, passwords use bcrypt, opt-in consent is recorded with the notice version, logs carry only IDs, and erasure removes notes and sessions. The main gap is that product-update consent can't be withdrawn on its own; the other points are low severity (retention limits, input validation, self-service rights)."

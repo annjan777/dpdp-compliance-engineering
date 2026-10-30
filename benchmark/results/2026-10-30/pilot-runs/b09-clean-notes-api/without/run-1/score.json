@@ -1,0 +1,20 @@
+{
+  "scorer_version": "0.1",
+  "case": "b09-clean-notes-api",
+  "malformed": [],
+  "integrity": {
+    "invalid_citations": [],
+    "compliance_claims": []
+  },
+  "components": {
+    "recall": null,
+    "status": 1.0,
+    "precision": 1.0,
+    "evidence": 1.0
+  },
+  "matched": {},
+  "false_positives": [],
+  "human_review": {},
+  "notes": [],
+  "score": 1.0
+}

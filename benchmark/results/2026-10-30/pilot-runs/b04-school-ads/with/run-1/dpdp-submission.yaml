@@ -1,0 +1,109 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(f)", "Act s.2(j)", "Act s.2(i)", "Act s.3(a)", "Act s.4", "Act s.7", "Act s.9(3)", "Act s.9(4)", "Rules r.12", "Rules Sch.4", "Act s.17(4)", "G.S.R. 843(E)"]
+findings:
+  - title: "Children's learning-page behaviour (pupil ID, class, DOB, topic, dwell time) is tracked and sent to a third-party ad network"
+    file: school/app.py
+    line: 19
+    category: legal-gap
+    severity: critical
+    mandatory: true
+    citations: ["Act s.9(3)", "Act s.9(2)", "Act s.9(4)", "Rules r.12", "Rules Sch.4", "Act Sch. item 3"]
+  - title: "Targeted advertising aimed at children (school classes 1-10) using their interests and age derived from DOB"
+    file: school/app.py
+    line: 20
+    category: legal-gap
+    severity: critical
+    mandatory: true
+    citations: ["Act s.9(3)", "Act s.9(4)", "Rules r.12", "Rules Sch.4", "Act Sch. item 3"]
+  - title: "No lawful ground, notice or verifiable parental consent for processing pupils' data for advertising; the educational-institution exemption covers education and safety purposes, not advertising"
+    file: school/app.py
+    lines: [16, 20]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.5(1)", "Act s.6(1)", "Act s.7", "Act s.9(1)", "Rules r.3", "Rules r.10", "Rules r.12"]
+  - title: "Pupils' data (including full DOB) disclosed to an ad network hosted outside India with no processor contract or data-sharing controls; the data sent is more than any stated purpose needs"
+    file: school/adnet.py
+    lines: [1, 6]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(1)", "Act s.8(2)", "Act s.8(5)", "Rules r.6(1)(f)", "Act s.6(1)"]
+  - title: "No authorisation on mark_absent / learning_page_viewed: any caller can look up a pupil by ID, write attendance and trigger an SMS to the parent (IDOR)"
+    file: school/app.py
+    lines: [10, 17]
+    category: security-vulnerability
+    severity: high
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "Pupil names, DOBs and parent mobiles are stored in a plaintext SQLite file in the working directory, with no encryption or masking"
+    file: school/app.py
+    lines: [5, 6]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "No access logging or monitoring of personal-data access, and no one-year retention of logs"
+    file: school/app.py
+    lines: [10, 20]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.8(3)"]
+  - title: "No breach detection or notification path to the Board and affected parents/pupils"
+    file: school/app.py
+    lines: [1, 20]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(6)", "Rules r.7(1)", "Rules r.7(2)", "Act Sch. item 2"]
+  - title: "Child's name and absence sent by SMS to an unverified parent_mobile through an SMS vendor with no contract, so a wrong or stale number discloses the child's data to a stranger; the SENT list keeps mobile numbers and messages with no limit"
+    file: school/sms.py
+    lines: [1, 5]
+    category: operational-weakness
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(2)", "Act s.8(3)", "Act s.8(5)", "Rules r.6(1)(f)"]
+  - title: "Ad-network SDK keeps an unbounded in-memory/global EVENTS store of children's tracking events with no retention or deletion"
+    file: school/adnet.py
+    lines: [2, 6]
+    category: operational-weakness
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(7)", "Act s.6(6)"]
+  - title: "No retention, erasure or correction workflow for pupil and attendance records (s.8(7) and s.12(3) may be disapplied if the school is State)"
+    file: school/app.py
+    lines: [6, 7]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(7)", "Act s.12", "Act s.17(4)", "Rules r.8(3)"]
+  - title: "No published contact for privacy questions and no grievance mechanism"
+    file: README.md
+    lines: [1, 3]
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.8(9)", "Act s.8(10)", "Act s.13", "Rules r.9", "Rules r.14(3)"]
+  - title: "Ad-network host is outside India; transfer destinations are not recorded or checked against Central Government restrictions"
+    file: school/adnet.py
+    line: 1
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Act s.16", "Rules r.15"]
+  - title: "Attendance inserts have no uniqueness or correction path; duplicate or wrong rows can drive inaccurate absence notices to parents"
+    file: school/app.py
+    lines: [7, 11]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(3)"]
+legal_questions:
+  - "Is the government-run Odisha school (or the department operating this app) 'State' or an instrumentality under Article 12, so that Act s.17(4) disapplies s.8(7) and s.12(3)? Who is the Data Fiduciary: the school, the state education department, or an app vendor?"
+  - "What is the lawful ground for attendance recording and absence SMS: Act s.7(b) (State service), s.7(c) (State function), or consent? This decides whether s.5 notice and s.11-12 rights apply."
+  - "Does the Rules Sch.4 Part A educational-institution exemption cover attendance tracking and parent SMS, and what is its exact limiting condition? (Advertising appears to fall outside it.)"
+  - "Is the ad network a processor of the school or an independent Data Fiduciary (Act s.2(i), s.2(k))? Does sponsored content on the learning page with vendor-side tracking amount to the school 'undertaking' targeted advertising directed at children under s.9(3)?"
+  - "Is the ad network's foreign hosting country subject to any Central Government restriction under Act s.16 or any stricter sectoral or state education rule?"
+  - "Which attendance and pupil records must be kept under education law or Rules r.8(3), and for how long?"
+summary: "The app processes digital personal data of school children (classes 1-10) in India, so the Act applies (s.3(a), s.2(t), s.2(f)). The substantive duties commence on 13 May 2027 under G.S.R. 843(E). They are applicable but not yet in force on the 2026-10-31 assessment date. The most serious problem is that pupils' learning behaviour, class and DOB are sent to a foreign ad network and used for targeted ads. That conflicts with s.9(3) and falls outside any Sch.4 educational exemption. There are also no access controls, no encryption, no logging and no breach or grievance processes. This is an engineering assessment, not legal advice."

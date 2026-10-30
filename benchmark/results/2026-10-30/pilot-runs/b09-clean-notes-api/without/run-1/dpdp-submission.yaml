@@ -1,0 +1,51 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.4(1)", "Act s.6(1)"]
+findings:
+  - title: "Product-update consent can only be withdrawn by deleting the whole account; no withdrawal path as easy as the signup opt-in"
+    file: src/app.js
+    lines: [19, 34]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)", "Rules r.3(c)"]
+  - title: "Signup does not validate input: a missing password is hashed as the string \"undefined\", and missing or duplicate emails are accepted"
+    file: src/app.js
+    lines: [17, 18]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)"]
+  - title: "Session tokens never expire and are not rotated; stolen tokens stay valid until account erasure"
+    file: src/app.js
+    lines: [9, 14]
+    category: security-vulnerability
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No age check or verifiable parental consent flow for a consumer app open to the general public"
+    file: src/app.js
+    lines: [16, 22]
+    category: legal-gap
+    severity: medium
+    mandatory: false
+    citations: ["Act s.9(1)", "Rules r.10(1)"]
+  - title: "Logs go only to stdout, with no record of failed authentication or note access and no retention, so unauthorised access is hard to detect or investigate"
+    file: src/log.js
+    line: 2
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Rules r.6(1)(c)", "Rules r.6(1)(e)"]
+  - title: "No rate limiting on signup or authenticated endpoints"
+    file: src/app.js
+    line: 16
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(5)"]
+legal_questions:
+  - "Can children (under 18) sign up? If so, what verifiable parental consent mechanism under s.9 and r.10 is needed, and does any exemption apply?"
+  - "Is the processing of account email and notes for the core service based on consent (s.6) or a legitimate use (s.7(a)), and does notice-v3 meet s.5 and r.3 requirements?"
+  - "Is keeping the consent records and erasure processing log (keyed by userId) after account deletion justified under s.8(7) and r.6(1)(e)/r.8 retention requirements, and for how long?"
+  - "How are access, correction and grievance requests (s.11 to s.13, r.14) handled outside this API, and how are breaches notified under s.8(6) and r.7?"
+summary: "This is a consumer note-taking backend that processes digital personal data (emails, passwords, note content) of users in India, so the DPDP Act applies in full. The code is generally sound: passwords are hashed with bcrypt, note access checks ownership, consent for marketing is opt-in and versioned, logs avoid PII, and erasure deletes user data. The main gaps are that consent can only be withdrawn by deleting the account, signup input is not validated, sessions never expire, there is no age gate, and security logging is thin."

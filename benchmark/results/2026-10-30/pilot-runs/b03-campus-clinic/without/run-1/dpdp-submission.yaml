@@ -1,0 +1,108 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(h)", "Act s.2(i)", "Act s.2(j)", "Act s.2(s)", "Act s.3(a)", "Act s.3(c)", "Act s.4(1)", "Act s.16(1)", "Act s.17(2)(a)", "Rules r.1(3)"]
+findings:
+  - title: "Marketing consent defaults to opted-in (DB default 1 and register() default True); no free, specific, affirmative consent and no record of consent"
+    file: clinic/app.py
+    lines: [27, 40]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.6(1)", "Act s.6(10)", "Act s.7(a)", "Rules r.3"]
+  - title: "Newsletter sent to everyone with the pre-ticked flag; no way to withdraw consent or opt out"
+    file: clinic/app.py
+    lines: [62, 67]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(1)", "Act s.6(4)", "Act s.6(6)", "Rules r.3(c)"]
+  - title: "Patient email and free-text symptoms (health data) sent to a US analytics vendor for a purpose beyond care, without notice, consent, minimisation or a processor contract"
+    file: clinic/app.py
+    line: 54
+    category: legal-gap
+    severity: critical
+    mandatory: true
+    citations: ["Act s.4(1)", "Act s.5(1)", "Act s.6(1)", "Act s.8(2)", "Act s.8(5)", "Act s.16(1)", "Rules r.6(1)(f)", "Rules r.15"]
+  - title: "Broken access control: get_appointments ignores requester_id, so any user can read any other user's appointments and symptoms (IDOR)"
+    file: clinic/app.py
+    lines: [58, 59]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "Name, email and phone written in plaintext to application logs at registration"
+    file: clinic/app.py
+    line: 46
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "Health data (symptoms) and identifiers stored unencrypted with no masking or pseudonymisation"
+    file: clinic/app.py
+    lines: [19, 34]
+    category: security-vulnerability
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)"]
+  - title: "delete_user removes only the users row; appointments/symptoms stay orphaned (FKs not enforced in SQLite) and the analytics vendor is never told to erase"
+    file: clinic/app.py
+    lines: [70, 72]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12(3)", "Rules r.8(1)", "Rules r.14"]
+  - title: "No notice at registration (itemised data, purposes, how to withdraw consent, exercise rights or complain to the Board)"
+    file: clinic/app.py
+    line: 40
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.5(1)", "Rules r.3"]
+  - title: "Date of birth is collected but there is no age check or verifiable parental consent for students under 18 (only partly covered by the education/healthcare exemptions)"
+    file: clinic/app.py
+    lines: [24, 40]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.2(f)", "Act s.9(1)", "Act s.9(3)", "Rules r.10", "Rules r.12"]
+  - title: "No mechanisms for access, correction, grievance redressal or nominee rights, and no published contact person"
+    file: clinic/app.py
+    lines: [40, 72]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(9)", "Act s.8(10)", "Act s.11", "Act s.12", "Act s.13", "Act s.14", "Rules r.9", "Rules r.14"]
+  - title: "No access logging, monitoring or retention of logs, so breaches cannot be detected and the Board and affected users cannot be notified"
+    file: clinic/app.py
+    lines: [50, 59]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Act s.8(6)", "Rules r.6(1)(c)", "Rules r.6(1)(d)", "Rules r.6(1)(e)", "Rules r.7"]
+  - title: "No retention period or erasure when the purpose ends for appointment and health data"
+    file: clinic/app.py
+    lines: [29, 34]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Rules r.8"]
+  - title: "Phone, DOB and roll number collected without a stated need for booking (data minimisation)"
+    file: clinic/app.py
+    lines: [23, 25]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.6(1)"]
+  - title: "Vendor integration has no processor safeguards (contract, purpose restriction, deletion hooks); payload is sent as-is"
+    file: clinic/vendors.py
+    lines: [4, 8]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(1)", "Act s.8(2)", "Act s.16(1)", "Rules r.15"]
+legal_questions:
+  - "Is the publicly funded university (or its health centre) a 'State' instrumentality notified under Act s.17(2)(a), or eligible under s.7(b)/Rules r.5, and would any such exemption reach analytics and marketing processing?"
+  - "Which processing is covered by the Fourth Schedule exemptions under Rules r.12 (educational institutions; clinical establishments/healthcare professionals) from s.9(1) and s.9(3) for minor students, and which (analytics, newsletter) still needs verifiable parental consent?"
+  - "Can the clinic rely on s.7(f)/(g) (medical treatment / health services) for any clinical processing, or is consent under s.6 the only basis?"
+  - "Has the Central Government restricted transfers to the analytics vendor's country under s.16(1), and does any sectoral rule (e.g. health-records rules) impose stricter localisation under s.16(2)?"
+  - "Given the phased commencement in Rules r.1(3) (most substantive obligations, including r.3 and r.6-r.15, from about 13 May 2027), what remediation timeline applies, and could the university be notified as a Significant Data Fiduciary under s.10?"
+summary: "The DPDP Act applies. The portal processes digital personal data of identifiable students and staff, including health symptoms, in India, and nothing in the Act exempts an 'internal university portal'. Any State-instrumentality, education or healthcare exemption is limited and needs legal review. The worst problems are symptoms and emails sent to a US analytics vendor without notice or consent, an IDOR exposing everyone's appointments, opt-out marketing consent, incomplete erasure, and no notice, children's safeguards, rights handling or breach readiness."

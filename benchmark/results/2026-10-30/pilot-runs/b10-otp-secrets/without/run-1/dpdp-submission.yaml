@@ -1,0 +1,80 @@
+overall_status: applicable
+citations: ["Act s.3(a)", "Act s.2(i)", "Act s.2(t)", "Act s.2(j)", "Act s.2(x)"]
+findings:
+  - title: "Customer phone number and live OTP written in plaintext to application logs"
+    file: src/auth.js
+    line: 10
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)"]
+  - title: "Razorpay key secret hardcoded in source and exported from the auth module (value here is a placeholder, but the pattern exposes payment credentials)"
+    file: src/auth.js
+    lines: [4, 18]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "OTP never expires, is not deleted after successful use, and has no failed-attempt limit, so it can be brute-forced or replayed (account takeover)"
+    file: src/auth.js
+    lines: [14, 16]
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(b)"]
+  - title: "No rate limiting on OTP sending; allows SMS bombing of any phone number and enumeration"
+    file: src/auth.js
+    lines: [7, 12]
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)"]
+  - title: "Phone-number-to-OTP map is never purged, so personal data is retained with no retention limit or erasure"
+    file: src/auth.js
+    lines: [5, 9]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.8(5)"]
+  - title: "OTPs stored in plaintext rather than hashed"
+    file: src/auth.js
+    line: 9
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Rules r.6(1)(a)"]
+  - title: "OTP compared with non-constant-time equality"
+    file: src/auth.js
+    line: 15
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "Phone number collected with no notice or consent record anywhere in the codebase"
+    file: src/auth.js
+    line: 7
+    category: legal-gap
+    severity: medium
+    mandatory: false
+    citations: ["Act s.5(1)", "Act s.6(1)", "Act s.7(a)", "Rules r.3"]
+  - title: "Phone number and OTP passed to a third-party SMS gateway (data processor) with no processor safeguards visible"
+    file: src/sms.js
+    line: 1
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(2)", "Rules r.6(1)(f)"]
+  - title: "No security audit logging of authentication events to detect or investigate unauthorised access and support breach notification"
+    file: src/auth.js
+    lines: [7, 16]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(6)", "Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.7"]
+legal_questions:
+  - "Is login and order processing based on consent (s.6, requiring a r.3 notice) or on the voluntary-provision legitimate use under s.7(a)? And is a notice shown in a client app that is not in this repo?"
+  - "Is there a written contract with the SMS gateway and with Razorpay that meets s.8(2), and are they acting as processors or as independent fiduciaries?"
+  - "Can children (under 18) place orders? If so, what verifiable parental consent mechanism is needed under s.9 and r.10?"
+  - "What retention period applies to customer and order data, given s.8(7) and r.8, and any sectoral or tax retention duties?"
+  - "Where do the data principal rights (s.11 to s.13) and grievance redressal (s.8(10)) live, and what contact details are published under s.8(9)?"
+summary: "The Act applies: a Kolkata grocery-delivery API collects customers' phone numbers in digital form in India to authenticate them (s.3(a)), so the operator is a Data Fiduciary. The main problems are security safeguard failures under s.8(5) and r.6: phone numbers and OTPs are logged in plaintext, a payment secret is hardcoded, and OTPs never expire and have no attempt or rate limits. There is also indefinite retention of OTP data (s.8(7)). Whether notice and consent are required, and whether processor contracts are in place, cannot be told from the code."

@@ -1,0 +1,26 @@
+{
+  "scorer_version": "0.1",
+  "case": "b03-campus-clinic",
+  "malformed": [],
+  "integrity": {
+    "invalid_citations": [],
+    "compliance_claims": []
+  },
+  "components": {
+    "recall": 1.0,
+    "status": 1.0,
+    "precision": 1.0,
+    "evidence": 1.0
+  },
+  "matched": {
+    "T1": 1.0,
+    "T2": 1.0,
+    "T3": 1.0,
+    "T4": 1.0,
+    "T5": 1.0
+  },
+  "false_positives": [],
+  "human_review": {},
+  "notes": [],
+  "score": 1.0
+}

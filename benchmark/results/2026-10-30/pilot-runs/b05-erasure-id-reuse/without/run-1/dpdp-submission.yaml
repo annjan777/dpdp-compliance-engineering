@@ -1,0 +1,52 @@
+overall_status: applicable
+citations: ["Act s.3(a)", "Act s.2(t)", "Act s.2(n)", "Act s.2(i)", "Act s.2(x)", "Act s.4(1)"]
+findings:
+  - title: "Account deletion erases only the members row; posts and digest_optin rows for the member are retained indefinitely"
+    file: forum/app.py
+    lines: [27, 30]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.12(3)", "Act s.8(7)", "Act s.6(6)"]
+  - title: "INTEGER PRIMARY KEY without AUTOINCREMENT lets SQLite reuse a deleted member's id, so a new signup inherits the deleted member's orphaned posts (my_posts exposes another person's data)"
+    file: forum/app.py
+    lines: [8, 24]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Act s.8(6)", "Rules r.7(1)"]
+  - title: "Orphaned opt_in=1 row from a deleted member attaches to a reused id, so a new member who did not opt in receives the weekly digest (processing without consent)"
+    file: forum/app.py
+    lines: [33, 36]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4(1)", "Act s.6(1)", "Act s.7(a)"]
+  - title: "digest_optin has no primary/unique key or foreign key, allowing duplicate and contradictory consent records per member and no referential cleanup (no ON DELETE CASCADE)"
+    file: forum/app.py
+    lines: [9, 10]
+    category: operational-weakness
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(3)", "Act s.8(5)"]
+  - title: "No function to withdraw digest consent; opt-in can only be set at signup, so withdrawal is not as easy as giving consent"
+    file: forum/app.py
+    lines: [16, 18]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)"]
+  - title: "Deletion is not recorded or acted on beyond a single table; no erasure audit trail or verification that all copies (including any digest mailing lists) are removed"
+    file: forum/app.py
+    line: 29
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.8(7)", "Rules r.6(1)(e)"]
+legal_questions:
+  - "Is a privacy notice meeting Act s.5(1) and Rules r.3 shown at signup and before digest opt-in? It is not in this code."
+  - "Can children (under 18) join the forum? If so, verifiable parental consent under Act s.9 and Rules r.10 is required."
+  - "Does the forum have a lawful basis or legal obligation to keep posts after account deletion (e.g. preserving thread context or anonymised content), and if it does, must the posts be de-identified rather than kept linked to member_id?"
+  - "Could the forum ever reach the scale or classification of a social media intermediary or Significant Data Fiduciary, which would trigger the Rules r.8 / Third Schedule retention periods or Act s.10 duties?"
+  - "Does exposing a deleted member's posts to a new account holder count as a personal data breach that must be reported to the Board and affected Data Principals under Act s.8(6) and Rules r.7?"
+summary: "The forum is run from Bengaluru and processes digital personal data (email, display name, posts) of members. That makes the DPDP Act fully applicable, with the operator as Data Fiduciary. The main defect is that account deletion only removes the members row. Posts and consent rows are left behind, and because SQLite reuses rowids, a new member can inherit the deleted member's posts and digest opt-in. This breaks the erasure, security and consent obligations."

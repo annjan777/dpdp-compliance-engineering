@@ -1,0 +1,116 @@
+overall_status: applicable
+citations: ["Act s.2(t)", "Act s.2(i)", "Act s.3(a)", "Act s.3(b)", "Act s.4", "G.S.R. 843(E)"]
+findings:
+  - title: "Aadhaar number collected at gym-class signup with no apparent necessity (data minimisation)"
+    file: prisma/schema.prisma
+    line: 11
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.6(1)", "Act s.5(1)"]
+  - title: "Aadhaar number, phone and name stored in plaintext with no encryption, masking or tokenisation"
+    file: prisma/schema.prisma
+    lines: [10, 13]
+    category: security-vulnerability
+    severity: critical
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Act Sch. item 1"]
+  - title: "signup() returns the full created User record, including the Aadhaar number, to the caller"
+    file: src/signup.ts
+    line: 7
+    category: security-vulnerability
+    severity: high
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(a)", "Rules r.6(1)(b)"]
+  - title: "Unvalidated object spread into prisma.user.create allows mass assignment (e.g. marketingOptIn, id) and stores unchecked input"
+    file: src/signup.ts
+    line: 7
+    category: security-vulnerability
+    severity: medium
+    mandatory: false
+    citations: ["Act s.8(5)", "Act s.8(3)"]
+  - title: "Marketing consent defaults to true (pre-ticked / opt-out); signup never sets it from an affirmative user action"
+    file: prisma/schema.prisma
+    line: 12
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.6(1)"]
+  - title: "Marketing list built from default-true flag, so emails go to users who never consented"
+    file: src/signup.ts
+    lines: [10, 12]
+    category: legal-gap
+    severity: high
+    mandatory: true
+    citations: ["Act s.4", "Act s.6(1)"]
+  - title: "No notice at collection: no itemised data/purpose list, withdrawal or rights/complaint information before signup"
+    file: src/signup.ts
+    line: 5
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.5(1)", "Rules r.3"]
+  - title: "No consent record (timestamp, notice version, purpose) to prove marketing consent"
+    file: prisma/schema.prisma
+    line: 12
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(10)", "Act s.6(1)"]
+  - title: "No mechanism to withdraw marketing consent as easily as it was given, nor to stop downstream email processing"
+    file: src/signup.ts
+    lines: [10, 12]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.6(4)", "Act s.6(6)"]
+  - title: "No account erasure/correction path; Booking relation has no onDelete handling and no retention rule"
+    file: prisma/schema.prisma
+    lines: [18, 21]
+    category: legal-gap
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(7)", "Act s.12", "Rules r.8(3)"]
+  - title: "No access-summary capability for consent-based processing"
+    file: src/signup.ts
+    line: 1
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.11"]
+  - title: "No logging or monitoring of access to personal data (and no one-year log retention)"
+    file: src/signup.ts
+    lines: [5, 12]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(5)", "Rules r.6(1)(c)", "Rules r.6(1)(e)", "Rules r.8(3)"]
+  - title: "No published contact person or grievance mechanism referenced anywhere in the app"
+    file: README.md
+    line: 2
+    category: legal-gap
+    severity: low
+    mandatory: true
+    citations: ["Act s.8(9)", "Act s.8(10)", "Rules r.9", "Rules r.14(3)"]
+  - title: "Service is stated to be for adults but signup has no age declaration or check"
+    file: src/signup.ts
+    line: 5
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: ["Act s.9(1)", "Rules r.10"]
+  - title: "No breach-detection / intimation process evident for a database holding Aadhaar numbers"
+    file: prisma/schema.prisma
+    lines: [3, 6]
+    category: operational-weakness
+    severity: medium
+    mandatory: true
+    citations: ["Act s.8(6)", "Rules r.7"]
+legal_questions:
+  - "Is the gym operator permitted to collect and store Aadhaar numbers at all for class booking, given restrictions under the Aadhaar Act and UIDAI regulations (outside DPDP), and if identity verification is needed, can a less intrusive identifier or masked/offline Aadhaar suffice?"
+  - "What is the lawful ground for each purpose: is account/booking data covered by Act s.7(a) (voluntarily provided for a specified purpose) or does it need consent, and is marketing strictly consent-based?"
+  - "Are existing users' marketing opt-ins (default true) valid at all, and how must legacy users be re-noticed or re-consented under Act s.5(2) before 13 May 2027?"
+  - "Which email/marketing vendors and hosting providers act as Data Processors, and do contracts meet Act s.8(2) and Rules r.6(1)(f)?"
+  - "Which data and logs must be retained for one year under Rules r.8(3) after account deletion, versus erased under Act s.8(7)?"
+  - "Is there any evidence of a s.17(3)/s.17(5) exemption notification (e.g. startup class) covering this fiduciary? None was found in the repo."
+summary: "The app is a fitness-class booking service for adults in India that digitally processes name, email, phone, Aadhaar number and booking history and sends marketing emails, so the Act applies (Act s.3(a), s.2(t)); the operator appears to be the Data Fiduciary, and no exclusion or exemption is evidenced. As of 2026-10-31 the substantive duties (s.4–s.17, Rules r.3, r.5–r.16) are applicable but not yet in force until 13 May 2027 under G.S.R. 843(E), so the gaps are build-now items with a fixed deadline. The main problems are unjustified, plaintext Aadhaar collection that is also returned in the API response, a pre-ticked marketing opt-in with no notice, consent record or withdrawal, and no erasure, logging or grievance mechanisms."

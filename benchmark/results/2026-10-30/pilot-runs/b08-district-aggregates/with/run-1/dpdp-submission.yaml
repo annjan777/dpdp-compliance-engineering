@@ -1,0 +1,19 @@
+overall_status: not-currently-applicable
+citations: ["Act s.2(t)", "Act s.3(a)"]
+findings:
+  - title: "No small-cell suppression for low district/month counts; if the open-data feed ever publishes very small counts (e.g. 1-3), displayed figures could contribute to re-identifying patients"
+    file: dashboard.py
+    lines: [16, 18]
+    category: best-practice
+    severity: low
+    mandatory: false
+    citations: []
+  - title: "CSV input is parsed without validation (missing columns or non-integer/negative patient_count raise or silently distort totals); no check that the file contains only the expected aggregate columns"
+    file: dashboard.py
+    lines: [8, 13]
+    category: operational-weakness
+    severity: low
+    mandatory: false
+    citations: []
+legal_questions: []
+summary: "The dashboard only reads the state's published open-data CSV of district/month/count aggregates (verified in dashboard.py:11-12 and sample.csv); no data about an identifiable individual is collected or processed, so it is not personal data under Act s.2(t) and the Act does not reach this processing under s.3(a). The substantive provisions are also not in force until 13 May 2027. Only minor robustness and small-cell disclosure improvements are noted; re-assess if individual-level records, user accounts or analytics are ever added."

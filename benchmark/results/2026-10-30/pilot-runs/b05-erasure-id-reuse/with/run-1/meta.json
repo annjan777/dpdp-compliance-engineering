@@ -1,0 +1,14 @@
+{
+  "case": "b05-erasure-id-reuse",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 10,
+  "costUsd": 0.34447060000000007,
+  "durationSeconds": 52,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 8,
+  "leak_hits": []
+}

@@ -1,0 +1,14 @@
+{
+  "case": "b09-clean-notes-api",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 11,
+  "costUsd": 0.4010616000000001,
+  "durationSeconds": 61,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 9,
+  "leak_hits": []
+}

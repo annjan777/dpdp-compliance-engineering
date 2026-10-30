@@ -1,0 +1,14 @@
+{
+  "case": "b12-local-tool-telemetry",
+  "arm": "with",
+  "run": 1,
+  "error": null,
+  "turns": 7,
+  "costUsd": 0.3434272,
+  "durationSeconds": 51,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": true,
+  "tool_calls": 5,
+  "leak_hits": []
+}

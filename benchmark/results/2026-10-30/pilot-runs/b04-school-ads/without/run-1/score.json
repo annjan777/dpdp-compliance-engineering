@@ -1,0 +1,33 @@
+{
+  "scorer_version": "0.1",
+  "case": "b04-school-ads",
+  "malformed": [],
+  "integrity": {
+    "invalid_citations": [],
+    "compliance_claims": []
+  },
+  "components": {
+    "recall": 1.0,
+    "status": null,
+    "precision": 1.0,
+    "evidence": 1.0
+  },
+  "matched": {
+    "T1": 1.0
+  },
+  "false_positives": [],
+  "human_review": {
+    "status_submitted": "applicable",
+    "defensible": [
+      "applicable",
+      "partially-applicable",
+      "potentially-applicable"
+    ],
+    "notes": [
+      "Is the school State under Article 12?",
+      "Does Rules Sch.4 Part A item 3 cover attendance processing (yes for educational activities) \u2014 it does not cover targeted advertising (Act s.9(3))."
+    ]
+  },
+  "notes": [],
+  "score": 1.0
+}

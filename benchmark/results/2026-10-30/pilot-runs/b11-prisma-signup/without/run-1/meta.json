@@ -1,0 +1,14 @@
+{
+  "case": "b11-prisma-signup",
+  "arm": "without",
+  "run": 1,
+  "error": null,
+  "turns": 4,
+  "costUsd": 0.2389934,
+  "durationSeconds": 53,
+  "trace_found": true,
+  "submission_found": true,
+  "skill_used": false,
+  "tool_calls": 3,
+  "leak_hits": []
+}
