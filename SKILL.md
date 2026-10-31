@@ -1,7 +1,7 @@
 ---
 name: dpdp-compliance-engineering
 description: Assess, implement and verify India DPDP Act 2023 / DPDP Rules 2025 privacy controls in a real codebase - web apps, APIs, portals, ERPs, auth services, data pipelines, AI chatbots. Use whenever someone asks whether DPDP applies to an app, wants a DPDP or Indian data-protection gap assessment, needs consent, notice, data-principal rights, erasure/retention, breach-notification, children's-data or processor controls built, or wants a privacy compliance report or traceability matrix for an Indian-facing system - even if they only say "privacy compliance", "personal data audit" or "is this app covered". Works stack-agnostically, starts by testing applicability instead of assuming it, separates mandatory obligations from best practice, and never certifies compliance.
-license: Proprietary. Engineering aid, not legal advice.
+license: Apache-2.0. Engineering aid, not legal advice.
 ---
 
 # DPDP Compliance Engineering
