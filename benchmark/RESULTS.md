@@ -23,7 +23,7 @@ Engineering measurement, not legal advice. All fixtures are synthetic. Sample si
 | Judge model (A only) | `claude-sonnet-5-5`, 3 votes per grader |
 | Tool permissions | Read, Glob, Grep, Skill, Write, Edit, Bash. Bash ran in the bubblewrap 0.9.0 sandbox. |
 | Limits | 40 turns max, 1200 s timeout per run |
-| Rubric frozen at | A: commit `53d1d54`. B: commit `7a3de6a` (scorer later v0.1, fixtures b04–b12 edited before their valid runs; see Deviations) |
+| Rubric frozen at | A: commit `acb0517`. B: commit `339d0a5` (scorer later v0.1, fixtures b04–b12 edited before their valid runs; see Deviations) |
 | Host | Linux 6.18, Python 3.13.18, running as root |
 | Cost | A: $32.96 · B: $7.96 (including runs that hit the rate limit) |
 
@@ -78,9 +78,9 @@ Scoring rules are in `README.md`. Per-run submissions, final messages, leak chec
 1. **Harness trial (before freezing the rubric).**
    - The first trial had no sandbox, so every run errored. I installed `bubblewrap` and `socat`.
    - In the second trial, the portability case had no app to modify, and grader 03 misjudged a correct "s.11 is the closest right" answer. I added an Express fixture and reworded the grader.
-   - Both changes were committed (`53d1d54`) before any counted run.
+   - Both changes were committed (`acb0517`) before any counted run.
 2. **Account rate limit.** The 5-hour limit hit partway through A and B; 27 runs errored. Errored runs were excluded, never scored as 0.
-   - After the reset, I re-ran the affected cases in full (A: all 3 runs per arm for the 2 cases; B: b04–b12). The skill and graders were byte-identical (`git diff 53d1d54 -- evals SKILL.md references scripts assets` was empty). The CLI auto-updated from 2.1.312 to 2.1.314 between batches.
+   - After the reset, I re-ran the affected cases in full (A: all 3 runs per arm for the 2 cases; B: b04–b12). The skill and graders were byte-identical (`git diff acb0517 -- evals SKILL.md references scripts assets` was empty). The CLI auto-updated from 2.1.312 to 2.1.314 between batches.
 3. **Scorer v0.1.** After the first pilot runs, the evidence check started allowing 2 lines past the end of the file, the same tolerance as location matching. All B runs are scored with v0.1, both arms alike.
 4. **Fixture comments.** Comments that gave the answer away in b04–b12 were made neutral, with no line shifts. The one valid run on an old fixture (b04, skill arm, first batch) was discarded and re-run on the new fixture with the other b04–b12 runs.
 
