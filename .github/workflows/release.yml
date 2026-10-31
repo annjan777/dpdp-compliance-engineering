@@ -1,0 +1,23 @@
+name: Attach .skill to release
+on:
+  release:
+    types: [published]
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build dpdp-compliance-engineering.skill
+        run: |
+          mkdir -p build/dpdp-compliance-engineering
+          git archive HEAD | tar -x -C build/dpdp-compliance-engineering
+          # dev-only folders are not part of the installable skill
+          rm -rf build/dpdp-compliance-engineering/{evals,benchmark,.github}
+          (cd build && zip -qr ../dpdp-compliance-engineering.skill dpdp-compliance-engineering)
+          unzip -l dpdp-compliance-engineering.skill | tail -1
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" dpdp-compliance-engineering.skill --clobber
